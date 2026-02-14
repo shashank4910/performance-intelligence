@@ -1,8 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0c0f14;
+  --foreground: #e8ecf1;
+  --card: #13171f;
+  --card-border: #1e2633;
+  --accent: #22d3ee;
+  --accent-dim: #0891b2;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --muted: #64748b;
+  --glow: rgba(34, 211, 238, 0.15);
 }
 
 @theme inline {
@@ -12,15 +21,50 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+/* Subtle grid overlay for depth */
+.bg-grid {
+  background-image:
+    linear-gradient(rgba(34, 211, 238, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 211, 238, 0.03) 1px, transparent 1px);
+  background-size: 48px 48px;
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #22d3ee 0%, #a78bfa 50%, #22d3ee 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Soft glow for focus / highlights */
+.glow-ring {
+  box-shadow: 0 0 0 1px var(--card-border), 0 0 24px var(--glow);
+}
+
+/* Score bar fill animation */
+@keyframes score-fill {
+  from { width: 0; }
+}
+
+.animate-score-fill {
+  animation: score-fill 0.8s ease-out forwards;
+}
+
+/* Pulse for loading */
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+.animate-pulse-soft {
+  animation: pulse-soft 1.5s ease-in-out infinite;
 }
