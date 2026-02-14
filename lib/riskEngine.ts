@@ -155,3 +155,79 @@ export function getRiskLevel(score: number): "Low" | "Medium" | "High" {
   if (score <= 69) return "Medium";
   return "High";
 }
+
+const FIX_WEIGHTS = {
+  speed: 0.3,
+  ux: 0.25,
+  seo: 0.15,
+  conversion: 0.2,
+  scaling: 0.1,
+} as const;
+
+function priorityFromScore(score: number): "High" | "Medium" | "Low" {
+  if (score >= 70) return "High";
+  if (score >= 40) return "Medium";
+  return "Low";
+}
+
+/**
+ * Returns top 3 fix priorities by weighted impact (score × weight), sorted descending.
+ */
+export function generateFixPriorities(scores: {
+  speedRisk: number;
+  uxRisk: number;
+  seoRisk: number;
+  conversionRisk: number;
+  scalingRisk: number;
+}): Array<{ category: string; score: number; priority: "High" | "Medium" | "Low" }> {
+  const categories = [
+    { name: "speed", score: scores.speedRisk, weight: FIX_WEIGHTS.speed },
+    { name: "ux", score: scores.uxRisk, weight: FIX_WEIGHTS.ux },
+    { name: "seo", score: scores.seoRisk, weight: FIX_WEIGHTS.seo },
+    { name: "conversion", score: scores.conversionRisk, weight: FIX_WEIGHTS.conversion },
+    { name: "scaling", score: scores.scalingRisk, weight: FIX_WEIGHTS.scaling },
+  ].map((c) => ({
+    ...c,
+    weightedImpact: c.score * c.weight,
+  }));
+
+  return categories
+    .sort((a, b) => b.weightedImpact - a.weightedImpact)
+    .slice(0, 3)
+    .map(({ name, score }) => ({
+      category: name,
+      score,
+      priority: priorityFromScore(score),
+    }));
+}
+
+export function estimateBusinessImpact(overallHealth: number) {
+  if (overallHealth >= 85) {
+    return {
+      impact_level: "Minimal",
+      estimated_conversion_loss: "0–3%",
+    };
+  }
+  if (overallHealth >= 70) {
+    return {
+      impact_level: "Moderate",
+      estimated_conversion_loss: "3–8%",
+    };
+  }
+  if (overallHealth >= 50) {
+    return {
+      impact_level: "Significant",
+      estimated_conversion_loss: "8–15%",
+    };
+  }
+  if (overallHealth >= 30) {
+    return {
+      impact_level: "Severe",
+      estimated_conversion_loss: "15–25%",
+    };
+  }
+  return {
+    impact_level: "Critical",
+    estimated_conversion_loss: "25%+",
+  };
+}

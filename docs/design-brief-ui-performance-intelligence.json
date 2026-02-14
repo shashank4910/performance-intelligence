@@ -1,0 +1,221 @@
+{
+  "meta": {
+    "product_name": "UI Performance Intelligence Tool",
+    "description": "Premium AI-powered performance intelligence dashboard. Skeuomorphic, modern, deep shadows, glass surfaces, soft colors. Dark-first with green accents on black; light mode mirrors structure with white cards and soft gray borders.",
+    "design_style": "Skeuomorphic, modern, executive-grade, calm. Deep shadows, glass (subtle blur, low-opacity borders), soft gradient background. Two main palettes only: Primary (blue) for active/charts/CTAs; Secondary (cyan/teal) for AI accents. Grayscale neutrals; accent colors (green, red, amber) for status and charts only.",
+    "density": "Comfortable spacing, medium information density",
+    "border_radius_scale": {
+      "container": "24px",
+      "cards": "20px",
+      "buttons": "12px",
+      "inputs": "12px",
+      "badges": "9999px (pill)"
+    }
+  },
+
+  "layout": {
+    "structure": "Left sidebar navigation + main content area (3-column: sidebar left, main right). Sidebar shifts below content on smaller breakpoints.",
+    "max_width": "Centered container, approx 1280–1440px; sidebar fixed width ~240–280px on desktop",
+    "padding": {
+      "outer": "32px",
+      "section_gap": "24px",
+      "card_gap": "20px"
+    },
+    "grid": {
+      "desktop": "Sidebar fixed left; main content 12-column grid",
+      "main_cards": "Metric cards in 2–4 columns depending on breakpoint",
+      "second_row_left": "Chart/table span 8",
+      "second_row_right": "News/gains cards span 4 or stack",
+      "sidebar": "Fixed left on xl; below content on lg and down"
+    }
+  },
+
+  "responsive_breakpoints_tailwind": {
+    "sm": "640px – single column, cards stack, sidebar as drawer or top",
+    "md": "768px – 2-column layout for metric cards",
+    "lg": "1024px – 3-column grid; sidebar stacks below main content",
+    "xl": "1280px – full layout: sidebar left + main grid",
+    "2xl": "1536px – max width container centered"
+  },
+
+  "color_system": {
+    "design_brief_variant": "Green accents, black background, white text (alternate spec)",
+    "implementation_palette": "Primary blue, Secondary cyan/teal; grayscale neutrals; green/red/amber for status only",
+
+    "mode": {
+      "dark": {
+        "background_base": "#0B1220",
+        "background_gradient": "Soft radial gradient (blue or neutral) top-right; calm, not heavy",
+        "card_surface": "Glass: rgba(17, 25, 40, 0.75) with backdrop-blur",
+        "border": "rgba(255,255,255,0.08)",
+        "text_primary": "#F8FAFC",
+        "text_secondary": "#94A3B8",
+        "muted": "#64748B"
+      },
+      "light": {
+        "background_base": "#F8FAFC",
+        "card_surface": "#FFFFFF",
+        "border": "#E2E8F0",
+        "text_primary": "#0F172A",
+        "text_secondary": "#475569",
+        "muted": "#94A3B8"
+      }
+    },
+
+    "primary_palette": {
+      "base": "#3B82F6",
+      "light": "#60A5FA",
+      "dark": "#1D4ED8",
+      "usage": "Active states, main charts, primary CTAs, highlighted metrics"
+    },
+
+    "secondary_palette": {
+      "base": "#06B6D4",
+      "light": "#22D3EE",
+      "dark": "#0891B2",
+      "usage": "AI accents, supporting visuals, secondary charts, progress fills"
+    },
+
+    "accent_colors_status_only": {
+      "success": "#22C55E",
+      "warning": "#F59E0B",
+      "danger": "#EF4444",
+      "usage": "Status indicators and chart semantics (positive/neutral/negative) only"
+    },
+
+    "gradient_usage": {
+      "background": "Soft radial overlay; avoid heavy color",
+      "cards": "Subtle radial glow top-right (primary or neutral)",
+      "buttons": "Soft vertical gradient primary-600 → primary-500",
+      "charts": "Gradient fill primary/secondary → transparent"
+    }
+  },
+
+  "typography": {
+    "font_family": "Modern sans-serif (Inter / Geist style)",
+    "principle": "Structured, calm. Hierarchy through size and weight.",
+    "heading_large": {
+      "size": "32–36px",
+      "weight": "600",
+      "usage": "Page title"
+    },
+    "card_title": {
+      "size": "16–18px",
+      "weight": "500",
+      "usage": "Medium card titles"
+    },
+    "metric_value": {
+      "size": "28–32px",
+      "weight": "600",
+      "usage": "Bold metric values"
+    },
+    "caption": {
+      "size": "12–13px",
+      "weight": "400",
+      "color": "text-secondary",
+      "usage": "Muted captions"
+    }
+  },
+
+  "navigation": {
+    "position": "Left sidebar (fixed on xl); shifts below on smaller breakpoints",
+    "elements": [
+      "Logo/brand at top",
+      "Nav items: Dashboard, Analyses, Settings",
+      "User profile / account at bottom"
+    ],
+    "active_style": "Primary color pill or left border; subtle primary bg",
+    "inactive_style": "Text secondary; hover bg-white/5 (dark) or bg-gray-100 (light)"
+  },
+
+  "components": {
+    "line_chart": {
+      "name": "Account balances / Performance score over time",
+      "description": "Line chart showing trend (e.g. account balances or performance score over time)",
+      "style": "Smooth curves, gradient fill (primary → transparent), rounded elements, subtle glow on dots"
+    },
+    "table": {
+      "name": "Past transactions / Audit history",
+      "description": "Table of past transactions or analysis runs",
+      "style": "Glass card container; header muted; row hover bg-white/5; borders subtle"
+    },
+    "card_latest_news": {
+      "name": "Latest news / Recent insights",
+      "description": "Card showing latest news or product updates / recommendations",
+      "layout": "Title + short list or highlight + optional CTA"
+    },
+    "card_gains_losses": {
+      "name": "Total gains/losses / Performance delta",
+      "description": "Card showing total gains/losses or net performance impact",
+      "layout": "Large metric + trend indicator (green up / red down); optional sparkline"
+    }
+  },
+
+  "cards": {
+    "style": {
+      "background": "Glass effect (backdrop-blur)",
+      "backdrop_blur": "blur-md",
+      "border": "1px solid rgba(255,255,255,0.08)",
+      "shadow": "Soft large shadow 0 20px 40px rgba(0,0,0,0.25)",
+      "radius": "Large (20px)",
+      "hover": "Lift 4px + stronger shadow",
+      "transition": "150–200ms ease-in-out"
+    },
+    "metric_card": "Icon + Title + Metric + Trend + optional chart",
+    "insight_card": "Text block + metric highlight + CTA buttons"
+  },
+
+  "charts": {
+    "style": {
+      "lines": "Smooth bezier curves",
+      "fills": "Gradient fill primary-500 → transparent",
+      "bars": "Rounded corners",
+      "dots": "Subtle glow"
+    },
+    "color_mapping": {
+      "positive": "success (green)",
+      "neutral": "warning (amber)",
+      "negative": "danger (red)"
+    }
+  },
+
+  "buttons": {
+    "primary": {
+      "bg": "primary-600",
+      "hover": "primary-500",
+      "text": "white",
+      "radius": "12px"
+    },
+    "secondary": {
+      "bg": "transparent",
+      "border": "1px solid border",
+      "hover": "bg-white/5 (dark) or bg-gray-100 (light)"
+    }
+  },
+
+  "micro_interactions": {
+    "hover_card": "Lift 4px + stronger shadow",
+    "hover_button": "Brightness increase",
+    "chart_hover": "Tooltip with dark surface and subtle border",
+    "transition": "150–200ms ease-in-out"
+  },
+
+  "icons": {
+    "style": "Thin outline, 1.5 stroke",
+    "color_default": "text-secondary",
+    "color_active": "primary-400"
+  },
+
+  "spacing_scale": {
+    "section_padding": "px-8 py-8",
+    "card_padding": "p-6",
+    "grid_gap": "gap-6"
+  },
+
+  "light_mode": {
+    "principle": "Mirror structure; replace dark surfaces with clean white cards and soft gray borders",
+    "card_surface": "#FFFFFF",
+    "border": "#E2E8F0",
+    "hover": "bg-gray-50"
+  }
+}
