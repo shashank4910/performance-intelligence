@@ -43,9 +43,13 @@ export default function Home() {
 
     try {
       const response = await fetch(
-        `/api/analyze-performance?url=${encodeURIComponent(url)}`
+        `/api/analyze?url=${encodeURIComponent(url)}`
       );
       const data = await response.json();
+      if (!response.ok) {
+        setResult({ error: data?.error || `Request failed (${response.status})` });
+        return;
+      }
       setResult(data);
     } catch {
       setResult({ error: "Failed to analyze. Please check the URL and try again." });
