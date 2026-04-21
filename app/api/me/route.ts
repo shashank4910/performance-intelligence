@@ -18,12 +18,14 @@ export async function GET() {
   const userId = session.user.id as string;
   const projects = await getProjectsByUserId(userId);
 
+  type ProjectLite = { id: string; url: string; industry: string | null };
+
   return NextResponse.json({
     user: {
       id: userId,
       email: session.user.email ?? null,
     },
-    projects: projects.map((p) => ({
+    projects: (projects as ProjectLite[]).map((p: ProjectLite) => ({
       id: p.id,
       url: p.url,
       industry: p.industry,
