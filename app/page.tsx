@@ -629,13 +629,13 @@ export default function Home() {
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/signup"
+                href="/auth/signup"
                 className="apm-btn-primary inline-flex min-h-[44px] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium"
               >
                 Sign up
               </Link>
               <Link
-                href="/login"
+                href="/auth/login"
                 className="apm-btn-ghost inline-flex min-h-[44px] items-center justify-center rounded-xl px-5 py-2.5 text-sm font-medium"
               >
                 Log in

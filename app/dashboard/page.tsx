@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { authOptions } from "@/lib/auth";
 import { getProjectsByUserId } from "@/lib/project";
+import { safeGetServerSession } from "@/lib/safeSession";
 
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   if (!session?.user?.id) redirect("/login");
 
   const projects = await getProjectsByUserId(session.user.id);

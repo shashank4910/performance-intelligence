@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { safeGetServerSession } from "@/lib/safeSession";
 import { getProjectForUser, getSnapshotsForRevenueStability } from "@/lib/project";
 import {
   buildRevenueStabilityPayload,
@@ -24,7 +24,7 @@ export async function GET(
   request: Request,
   { params }: { params: Promise<{ projectId: string }> }
 ) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

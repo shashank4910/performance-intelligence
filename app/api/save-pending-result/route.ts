@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { safeGetServerSession } from "@/lib/safeSession";
 import { getOrCreateProject } from "@/lib/project";
 import { prisma } from "@/lib/prisma";
 import { getDefaultMonthlyRevenue, DEFAULT_BUSINESS_MODEL_KEY } from "@/lib/impactEngine/businessModelRegistry";
@@ -13,7 +13,7 @@ export const dynamic = "force-dynamic";
 type Body = { url: string; data: Record<string, unknown> };
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

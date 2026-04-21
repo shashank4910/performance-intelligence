@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { safeGetServerSession } from "@/lib/safeSession";
 import { getProjectForUser } from "@/lib/project";
 import {
   getBusinessProfile,
@@ -14,7 +14,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -58,7 +58,7 @@ type PostBody = {
 } & ProjectBusinessProfileData;
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -140,7 +140,7 @@ type PatchBodyProfile = {
 };
 
 export async function PATCH(request: Request) {
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

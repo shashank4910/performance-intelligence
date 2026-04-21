@@ -22,7 +22,7 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
+import { safeGetServerSession } from "@/lib/safeSession";
 
 // Vercel: force the Node runtime (not Edge) so `pg`, `prisma`, and the full
 // `openai` SDK work. `maxDuration` is the ceiling Vercel allows this route to
@@ -291,7 +291,7 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const session = await getServerSession(authOptions);
+  const session = await safeGetServerSession(authOptions);
   const userId = session?.user?.id as string | undefined;
 
   warnIfMissingCoreEnv();
