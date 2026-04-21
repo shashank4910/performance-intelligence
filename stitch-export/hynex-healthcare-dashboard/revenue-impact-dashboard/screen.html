@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Performance Intelligence Engine - Revenue Impact</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#022100",
+                        "inverse-primary": "#106e00",
+                        "on-tertiary": "#002e6a",
+                        "surface-container-lowest": "#060e20",
+                        "surface-container-high": "#222a3d",
+                        "inverse-on-surface": "#283044",
+                        "secondary": "#b7c8e1",
+                        "on-error-container": "#ffdad6",
+                        "outline": "#85967c",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "primary": "#efffe3",
+                        "surface-dim": "#0b1326",
+                        "on-tertiary-container": "#005dc8",
+                        "surface-bright": "#31394d",
+                        "outline-variant": "#3c4b35",
+                        "background": "#0b1326",
+                        "on-primary": "#053900",
+                        "on-tertiary-fixed": "#001a42",
+                        "inverse-surface": "#dae2fd",
+                        "tertiary": "#faf9ff",
+                        "on-surface": "#dae2fd",
+                        "on-primary-fixed-variant": "#095300",
+                        "on-secondary-container": "#a9bad3",
+                        "surface-variant": "#2d3449",
+                        "primary-container": "#39ff14",
+                        "on-secondary-fixed": "#0b1c30",
+                        "surface-container": "#171f33",
+                        "secondary-fixed": "#d3e4fe",
+                        "tertiary-container": "#d0ddff",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "secondary-container": "#3a4a5f",
+                        "on-secondary": "#213145",
+                        "tertiary-fixed": "#d8e2ff",
+                        "surface-container-low": "#131b2e",
+                        "on-secondary-fixed-variant": "#38485d",
+                        "surface": "#0b1326",
+                        "on-background": "#dae2fd",
+                        "on-primary-container": "#107100",
+                        "surface-container-highest": "#2d3449",
+                        "on-surface-variant": "#baccb0",
+                        "primary-fixed": "#79ff5b",
+                        "secondary-fixed-dim": "#b7c8e1",
+                        "surface-tint": "#2ae500",
+                        "on-error": "#690005",
+                        "error": "#ffb4ab",
+                        "primary-fixed-dim": "#2ae500"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .neon-glow {
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.15);
+        }
+        .glass-card {
+            background: rgba(34, 42, 61, 0.4);
+            backdrop-filter: blur(20px);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1326;
+            color: #dae2fd;
+        }
+    </style>
+</head>
+<body class="bg-surface-dim overflow-x-hidden">
+<!-- SideNavBar Shell -->
+<aside class="h-screen w-72 left-0 top-0 fixed bg-[#131b2e] flex flex-col h-full py-8 space-y-6 tonal-shift-no-borders bg-[#0b1326] border-r border-[#39FF14]/10 shadow-2xl shadow-[#060e20] z-50">
+<div class="px-8">
+<h1 class="text-lg font-black text-[#CCFF33] uppercase tracking-widest">Performance Intelligence</h1>
+<p class="text-slate-500 text-[10px] uppercase tracking-widest mt-1">The Sovereign Lens</p>
+</div>
+<nav class="flex-1 px-4 space-y-1">
+<!-- Nav Item: Dashboard -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">dashboard</span>
+<span>Dashboard</span>
+</a>
+<!-- Nav Item: Priority Fixes -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">build_circle</span>
+<span>Priority Fixes</span>
+</a>
+<!-- Nav Item: Performance History -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">history</span>
+<span>Performance History</span>
+</a>
+<!-- Nav Item: Revenue Impact (ACTIVE) -->
+<a class="flex items-center px-4 py-3 bg-white/5 text-[#CCFF33] font-bold shadow-[inset_4px_0_0_0_#CCFF33] font-['Inter'] text-sm tracking-tighter transition-all rounded-lg" href="#">
+<span class="material-symbols-outlined mr-3 text-xl" style="font-variation-settings: 'FILL' 1;">payments</span>
+<span>Revenue Impact</span>
+</a>
+<!-- Nav Item: Market Position -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">analytics</span>
+<span>Market Position</span>
+</a>
+<!-- Nav Item: Competitive Intelligence -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">radar</span>
+<span>Competitive Intelligence</span>
+</a>
+<!-- Nav Item: Growth Impact Roadmap -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">map</span>
+<span>Growth Impact Roadmap</span>
+</a>
+<!-- Nav Item: Metrics Responsible -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">groups</span>
+<span>Metrics Responsible</span>
+</a>
+<!-- Nav Item: AI System Diagnosis -->
+<a class="flex items-center px-4 py-3 text-slate-500 opacity-80 font-['Inter'] text-sm tracking-tighter hover:bg-white/5 hover:text-white transition-all rounded-lg group" href="#">
+<span class="material-symbols-outlined mr-3 text-xl">psychology</span>
+<span>AI System Diagnosis</span>
+</a>
+</nav>
+<div class="px-8 mt-auto py-4 border-t border-white/5">
+<div class="flex items-center space-x-3">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="professional executive portrait in a modern dark office environment with subtle blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAb89GEKdhRKU2fachd0Zy5e79KvrNwXnZ602SzMv4eFWq72GoLqUprVyY0A60-nqBGhAR7jT0NRoUgYcuQB515wts87cJFy8vlOaOWsbKL8r26K1R0UWYI74PdAfjXLlnvAZogwDvrAmh1Rl23-2GmoCg9SaV-sSjAPS0U12x5wLwfOB_gToApmFoTKI93W0Cb8oKs-y6ASuPk84uJ3uCZ1yohgNJPRnTbVWIhzEVRC5wHUV3b39u9Xq8LSxOKlJ0rYpk9tFMudk4"/>
+</div>
+<div class="flex-1 overflow-hidden">
+<p class="text-on-surface text-xs font-bold truncate">Executive User Profile</p>
+<p class="text-slate-500 text-[10px] truncate">Chief Technical Officer</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="ml-72 min-h-screen relative">
+<!-- TopAppBar -->
+<header class="bg-[#0b1326]/80 backdrop-blur-xl flex justify-between items-center w-full px-8 py-4 full-width top-0 z-50 sticky bg-gradient-to-b from-[#0b1326] to-transparent flat no-shadows">
+<div>
+<h2 class="text-2xl font-black tracking-tight text-on-surface font-['Inter']">Revenue Impact</h2>
+<p class="text-on-surface-variant text-xs opacity-70 mt-0.5">analyzed: example.com • Updated 2 mins ago</p>
+</div>
+<div class="flex items-center space-x-6">
+<div class="relative group">
+<span class="material-symbols-outlined text-slate-400 hover:text-[#39FF14] transition-colors cursor-pointer text-2xl">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-[#39FF14] rounded-full"></span>
+</div>
+<span class="material-symbols-outlined text-slate-400 hover:text-[#39FF14] transition-colors cursor-pointer text-2xl">settings</span>
+</div>
+</header>
+<!-- Dashboard Content -->
+<div class="px-10 py-10 max-w-7xl mx-auto space-y-12">
+<!-- Bento Layout Start -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Business Context Card -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-8 flex flex-col justify-between">
+<div class="space-y-6">
+<div class="space-y-2">
+<h3 class="text-on-surface font-bold tracking-tight text-lg">Business Context</h3>
+<p class="text-on-surface-variant text-sm">Fine-tune the intelligence engine for your specific model.</p>
+</div>
+<div class="space-y-4">
+<div class="space-y-1">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Business Model</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg text-on-surface text-sm py-3 px-4 focus:ring-1 focus:ring-primary-container transition-all">
+<option>SaaS</option>
+<option>E-commerce</option>
+<option>Marketplace</option>
+</select>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Monthly Visitors</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg text-on-surface text-sm py-3 px-4 focus:ring-1 focus:ring-primary-container transition-all" type="text" value="500k"/>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Conv. Rate</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg text-on-surface text-sm py-3 px-4 focus:ring-1 focus:ring-primary-container transition-all" type="text" value="2.4%"/>
+</div>
+</div>
+<div class="grid grid-cols-2 gap-4">
+<div class="space-y-1">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">AOV</label>
+<input class="w-full bg-surface-container-lowest border-none rounded-lg text-on-surface text-sm py-3 px-4 focus:ring-1 focus:ring-primary-container transition-all" type="text" value="$120"/>
+</div>
+<div class="space-y-1">
+<label class="text-[10px] uppercase tracking-widest text-on-surface-variant font-bold">Estimate Style</label>
+<select class="w-full bg-surface-container-lowest border-none rounded-lg text-on-surface text-sm py-3 px-4 focus:ring-1 focus:ring-primary-container transition-all">
+<option>Conservative</option>
+<option selected="">Balanced</option>
+<option>Aggressive</option>
+</select>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full mt-8 bg-[#CCFF33] text-black font-black uppercase tracking-widest text-xs py-4 rounded-lg neon-glow hover:scale-[1.02] transition-transform">Calculate revenue impact</button>
+</div>
+<!-- Revenue at Risk Hero Section -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container-low rounded-xl p-10 relative overflow-hidden flex flex-col justify-center">
+<!-- Subtle chart background -->
+<div class="absolute right-0 bottom-0 w-2/3 h-48 opacity-20 pointer-events-none">
+<svg class="w-full h-full preserve-3d" viewbox="0 0 400 100">
+<path d="M0,80 Q50,75 100,60 T200,40 T300,20 T400,10" fill="none" stroke="#39FF14" stroke-width="3"></path>
+<path d="M0,80 Q50,75 100,60 T200,40 T300,20 T400,10 V100 H0 Z" fill="url(#grad)"></path>
+<defs>
+<lineargradient id="grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:#39FF14;stop-opacity:0.3"></stop>
+<stop offset="100%" style="stop-color:#39FF14;stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+<div class="relative z-10 space-y-4">
+<span class="px-3 py-1 bg-error-container text-on-error-container text-[10px] font-bold uppercase tracking-widest rounded-full">Revenue at Risk</span>
+<h2 class="text-7xl font-black text-[#CCFF33] tracking-tighter">$23K – $34K <span class="text-2xl text-on-surface-variant font-normal tracking-normal">/ month</span></h2>
+<div class="flex items-center space-x-2 text-xl font-bold text-on-surface">
+<span class="text-error font-black">~24% – 37%</span>
+<span>of your revenue at risk</span>
+</div>
+<p class="text-on-surface-variant max-w-md text-lg italic leading-relaxed">
+                            "Most revenue is lost before users even see your page load completely."
+                        </p>
+</div>
+</div>
+<!-- Where Users Are Dropping -->
+<div class="col-span-12 space-y-4">
+<div class="flex items-center justify-between mb-2">
+<h3 class="text-on-surface font-bold text-xl px-2">Leakage Analysis</h3>
+<span class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Priority Triage</span>
+</div>
+<!-- Card 1 -->
+<div class="glass-card rounded-xl p-6 flex items-center justify-between group hover:bg-surface-container-high transition-colors cursor-pointer border-l-4 border-primary-container">
+<div class="flex items-center space-x-6">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="text-[#CCFF33] text-2xl font-black">speed</span>
+</div>
+<div>
+<div class="flex items-center space-x-3">
+<h4 class="text-on-surface font-bold">Before users see page</h4>
+<span class="px-2 py-0.5 bg-primary-container/10 text-primary-container text-[9px] font-bold uppercase tracking-wider rounded border border-primary-container/20">Start here — highest recovery potential</span>
+</div>
+<p class="text-on-surface-variant text-sm mt-1">Users abandon because the initial loading experience feels broken or non-existent.</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-primary-container font-black text-2xl">$14.2K</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Potential Recovery</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="glass-card rounded-xl p-6 flex items-center justify-between group hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center space-x-6">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-2xl group-hover:text-[#39FF14] transition-colors">touch_app</span>
+</div>
+<div>
+<h4 class="text-on-surface font-bold">When users try to interact</h4>
+<p class="text-on-surface-variant text-sm mt-1">Frustration builds when clicks don't register immediately due to heavy background scripts.</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-on-surface font-black text-2xl">$8.4K</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Potential Recovery</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="glass-card rounded-xl p-6 flex items-center justify-between group hover:bg-surface-container-high transition-colors cursor-pointer">
+<div class="flex items-center space-x-6">
+<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-slate-400 text-2xl group-hover:text-[#39FF14] transition-colors">shopping_cart_checkout</span>
+</div>
+<div>
+<h4 class="text-on-surface font-bold">When users decide to convert</h4>
+<p class="text-on-surface-variant text-sm mt-1">Visual shifts or jitter during the final checkout step cause trust issues and cart abandonment.</p>
+</div>
+</div>
+<div class="text-right">
+<p class="text-on-surface font-black text-2xl">$11.4K</p>
+<p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Potential Recovery</p>
+</div>
+</div>
+</div>
+<!-- Footer Summary Actions -->
+<div class="col-span-12 lg:col-span-8 flex flex-col justify-center">
+<div class="p-8 bg-surface-container rounded-xl flex items-center justify-between">
+<div class="space-y-1">
+<h4 class="text-on-surface-variant text-xs uppercase tracking-widest font-bold">Projected Monthly Revenue</h4>
+<div class="flex items-center space-x-4">
+<span class="text-on-surface opacity-50 line-through text-lg">~$95K/mo</span>
+<span class="material-symbols-outlined text-[#CCFF33]">arrow_forward</span>
+<span class="text-[#CCFF33] text-2xl font-black">$118K – $129K/mo</span>
+</div>
+</div>
+<button class="bg-[#CCFF33] text-black font-black uppercase tracking-widest text-sm px-10 py-5 rounded-lg neon-glow hover:scale-105 transition-all">Recover up to $34,000 / month</button>
+</div>
+</div>
+<!-- How it works (Expandable) -->
+<div class="col-span-12 lg:col-span-4">
+<div class="bg-surface-container-low rounded-xl border border-white/5 overflow-hidden">
+<div class="p-5 flex items-center justify-between cursor-pointer">
+<span class="text-on-surface font-bold text-sm">How this is calculated</span>
+<span class="material-symbols-outlined text-on-surface-variant">expand_more</span>
+</div>
+<!-- Keeping it looking collapsed but providing content as requested -->
+<div class="px-5 pb-5 pt-0">
+<ul class="space-y-3 text-xs text-on-surface-variant list-disc pl-4 opacity-60">
+<li>Correlation of Core Web Vitals to conversion rates per sector.</li>
+<li>Real User Monitoring (RUM) bounce rate analysis at interaction delay.</li>
+<li>Industry standard predictive models for performance-driven ROI.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Performance Snapshot (Bottom) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 flex flex-wrap lg:flex-nowrap items-center justify-between gap-8 border-t border-white/5">
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Health Score</span>
+<div class="flex items-end space-x-2">
+<span class="text-3xl font-black text-on-surface">82</span>
+<span class="text-primary text-xs font-bold mb-1">+4.2 pts</span>
+</div>
+</div>
+<div class="h-10 w-[1px] bg-white/5 hidden lg:block"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">LCP (Loading)</span>
+<div class="flex items-end space-x-2">
+<span class="text-3xl font-black text-[#CCFF33]">1.2s</span>
+<span class="text-on-surface-variant text-xs mb-1">Fast</span>
+</div>
+</div>
+<div class="h-10 w-[1px] bg-white/5 hidden lg:block"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">INP (Interaction)</span>
+<div class="flex items-end space-x-2">
+<span class="text-3xl font-black text-slate-500">—</span>
+<span class="text-on-surface-variant text-xs mb-1">Pending</span>
+</div>
+</div>
+<div class="h-10 w-[1px] bg-white/5 hidden lg:block"></div>
+<div class="flex flex-col">
+<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">CLS (Stability)</span>
+<div class="flex items-end space-x-2">
+<span class="text-3xl font-black text-on-surface">0.05</span>
+<span class="text-on-surface-variant text-xs mb-1">Excellent</span>
+</div>
+</div>
+<div class="flex-1 text-right">
+<button class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest border border-white/10 px-4 py-2 rounded-lg hover:bg-white/5 transition-colors">
+                        View Full technical Audit
+                    </button>
+</div>
+</div>
+</div>
+</main>
+</body></html>

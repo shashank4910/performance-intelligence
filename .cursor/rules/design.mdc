@@ -1,0 +1,33 @@
+---
+description: Standalone Superdesign HTML prototypes in .superdesign (not app UI work)
+globs:
+  - ".superdesign/**"
+alwaysApply: false
+---
+
+# Superdesign — HTML design iterations only
+
+Use when the user asks for **standalone / mockup** screens delivered as **HTML in `.superdesign/design_iterations/`**, not when editing the Next.js app.
+
+## Output
+
+- Single-screen HTML per iteration: `.superdesign/design_iterations/{name}_{n}.html` (unique `n`).
+- Iterations on a file: `{current}_{n}.html` (e.g. `ui_1_2.html`).
+- Optional companion CSS in the same folder; reference from HTML.
+
+## Workflow (short)
+
+1. Layout (wireframe / structure) — confirm with user if they want sign-off.
+2. Theme (colors, type, spacing) — keep tokens in a local CSS file next to the HTML if needed.
+3. Animation — light motion only unless asked.
+4. One combined HTML (or HTML + CSS) — responsive, readable fonts (e.g. Google Fonts).
+
+## Styling defaults
+
+- Responsive; avoid generic “bootstrap blue” unless requested.
+- Prefer Flowbite CDN + Tailwind CDN only if the task calls for that stack; otherwise plain CSS is fine.
+- Do **not** paste multi-hundred-line theme blocks into rules — generate theme in the artifact file.
+
+## App product UI
+
+For **in-app** dashboard/pages/components, edit `app/` / `components/` like any normal Next.js work — **this rule does not apply** (see `AGENTS.md` and `docs/FEATURE_REGISTRY.md`).

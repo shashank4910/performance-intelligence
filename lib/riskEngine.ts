@@ -1,4 +1,16 @@
 /**
+ * PROJECT CONTEXT
+ *
+ * Before modifying this file, read:
+ * /docs/AI_CONTEXT.md
+ * /docs/ARCHITECTURE.md
+ *
+ * This project is a Performance Intelligence Engine that converts
+ * performance metrics into business impact insights.
+ */
+
+
+/**
  * Metrics from Lighthouse/PageSpeed used for risk scoring.
  * All time values in milliseconds unless noted.
  */
@@ -102,6 +114,59 @@ const HEALTH_WEIGHTS = {
   conversion: 0.2,
   scaling: 0.1,
 } as const;
+
+/** Default business-centric weights (customizable). Must total 1.0. */
+export const defaultWeights = {
+  speed: 0.35,
+  ux: 0.2,
+  seo: 0.15,
+  conversion: 0.2,
+  scaling: 0.1,
+} as const;
+
+const WEIGHT_KEYS = ["speed", "ux", "seo", "conversion", "scaling"] as const;
+type WeightKey = (typeof WEIGHT_KEYS)[number];
+
+function sumWeights(w: Record<WeightKey, number>): number {
+  return WEIGHT_KEYS.reduce((s, k) => s + (w[k] ?? 0), 0);
+}
+
+/** Validate weights sum to 1.0; return normalized or defaultWeights. */
+export function normalizeWeights(weights: Partial<Record<WeightKey, number>> | null): Record<WeightKey, number> {
+  if (!weights) return { ...defaultWeights };
+  const sum = sumWeights(weights as Record<WeightKey, number>);
+  if (Math.abs(sum - 1) < 1e-6) {
+    return { ...defaultWeights, ...weights } as Record<WeightKey, number>;
+  }
+  if (sum <= 0) return { ...defaultWeights };
+  const normalized = WEIGHT_KEYS.reduce((acc, k) => {
+    acc[k] = (weights[k] ?? 0) / sum;
+    return acc;
+  }, {} as Record<WeightKey, number>);
+  return normalized;
+}
+
+/**
+ * Weighted overall risk (0–100) from risk scores and optional weights.
+ * overallHealth = 100 - weightedRisk.
+ */
+export function calculateWeightedRisk(
+  speedRisk: number,
+  uxRisk: number,
+  seoRisk: number,
+  conversionRisk: number,
+  scalingRisk: number,
+  weights: Partial<Record<WeightKey, number>> | null = null
+): number {
+  const w = normalizeWeights(weights);
+  const weightedRisk =
+    speedRisk * w.speed +
+    uxRisk * w.ux +
+    seoRisk * w.seo +
+    conversionRisk * w.conversion +
+    scalingRisk * w.scaling;
+  return clampScore(weightedRisk);
+}
 
 /**
  * Overall health score (0–100). 100 = healthy.
@@ -230,4 +295,54 @@ export function estimateBusinessImpact(overallHealth: number) {
     impact_level: "Critical",
     estimated_conversion_loss: "25%+",
   };
+}
+
+/** Revenue risk level from score (0–100). */
+export type RevenueRiskLevel = "Critical" | "High" | "Moderate" | "Low";
+
+export function getRevenueRiskLevel(score: number): RevenueRiskLevel {
+  if (score >= 75) return "Critical";
+  if (score >= 50) return "High";
+  if (score >= 30) return "Moderate";
+  return "Low";
+}
+
+/**
+ * Revenue risk score (0–100). Base: speed + conversion + ux; adjusted by mobile %, LCP, INP.
+ */
+export function calculateRevenueRiskScore(
+  speedRisk: number,
+  uxRisk: number,
+  conversionRisk: number,
+  metrics: { lcp: number; inp: number },
+  mobileTrafficPercent: number = 100
+): number {
+  let base =
+    speedRisk * 0.4 +
+    conversionRisk * 0.4 +
+    uxRisk * 0.2;
+  const mobileWeight = Math.min(100, Math.max(0, mobileTrafficPercent)) / 100;
+  const lcpSeverity = metrics.lcp <= 2500 ? 0 : metrics.lcp <= 4000 ? 0.15 : 0.25;
+  const inpSeverity = metrics.inp <= 200 ? 0 : metrics.inp <= 500 ? 0.1 : 0.2;
+  const adjustment = (lcpSeverity + inpSeverity) * (0.5 + mobileWeight * 0.5);
+  const raw = (base * (1 + adjustment));
+  return clampScore(raw);
+}
+
+/**
+ * Data confidence: High (CrUX), Medium (lab only), Low (missing key metrics).
+ */
+export type ConfidenceLevel = "High" | "Medium" | "Low";
+
+export function getDataConfidence(
+  fieldDataAvailable: boolean,
+  hasKeyMetrics: boolean
+): { confidenceLevel: ConfidenceLevel; confidenceScore: number } {
+  if (fieldDataAvailable && hasKeyMetrics) {
+    return { confidenceLevel: "High", confidenceScore: 85 };
+  }
+  if (hasKeyMetrics) {
+    return { confidenceLevel: "Medium", confidenceScore: 60 };
+  }
+  return { confidenceLevel: "Low", confidenceScore: 35 };
 }

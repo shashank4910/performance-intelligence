@@ -1,36 +1,60 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Performance Intelligence
 
-## Getting Started
+SaaS that turns Lighthouse/PageSpeed data into **business intelligence**: revenue risk, resource-level attribution, and prioritized fixes. Target users are founders and product owners—not a generic Lighthouse dashboard.
 
-First, run the development server:
+## Quick start
 
 ```bash
+npm install
+cp .env.example .env.local
+# Edit .env.local — see Environment below
+npm run db:push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Documentation (read these first)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Doc | Purpose |
+|-----|---------|
+| [docs/AI_CONTEXT.md](docs/AI_CONTEXT.md) | Product mission, principles, AI editing rules |
+| [docs/FEATURE_REGISTRY.md](docs/FEATURE_REGISTRY.md) | Where major logic lives (navigation index) |
+| [docs/SYSTEM_STATE.md](docs/SYSTEM_STATE.md) | What’s built, known issues, planned work |
+| [docs/DECISION_LOG.md](docs/DECISION_LOG.md) | Locked product/engineering decisions |
+| [docs/ONBOARDING.md](docs/ONBOARDING.md) | Repo layout and main user/data flows |
+| [docs/DOCUMENTATION_MAINTENANCE.md](docs/DOCUMENTATION_MAINTENANCE.md) | How to keep docs current (PR checklist) |
+| [docs/AI_PROMPT_TEMPLATE.md](docs/AI_PROMPT_TEMPLATE.md) | Copy-paste prompts for AI-assisted work |
+| [AGENTS.md](AGENTS.md) | Conventions for AI agents and automation |
 
-## Learn More
+## Environment
 
-To learn more about Next.js, take a look at the following resources:
+Copy `.env.example` to `.env.local` and fill values. Never commit secrets.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **`DATABASE_URL`** — Postgres (e.g. Supabase); required for auth and saved projects.
+- **`NEXTAUTH_SECRET`** — Required for NextAuth (`openssl rand -base64 32`).
+- **`PAGESPEED_API_KEY`** or **`GOOGLE_API_KEY`** — PageSpeed Insights (analyze, competitor flows).
+- **`OPENAI_API_KEY`** — Optional; powers narrative/diagnosis routes when present.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Details: `.env.example` and [docs/FEATURE_REGISTRY.md](docs/FEATURE_REGISTRY.md) (Environment section).
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Command | Purpose |
+|---------|---------|
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Production build |
+| `npm run start` | Run production server |
+| `npm run lint` | ESLint |
+| `npm test` | Jest tests |
+| `npm run db:push` | Sync Prisma schema to database |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run `npm run build` and `npm run lint` before merging non-trivial changes.
+
+## Tech stack
+
+Next.js (App Router), React, Prisma + Postgres, NextAuth, Tailwind.
+
+## Contributing
+
+See [docs/DOCUMENTATION_MAINTENANCE.md](docs/DOCUMENTATION_MAINTENANCE.md) and `.github/pull_request_template.md`. Update `docs/FEATURE_REGISTRY.md` or `docs/SYSTEM_STATE.md` when behavior or file locations change.

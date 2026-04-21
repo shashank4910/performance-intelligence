@@ -1,0 +1,14 @@
+---
+description: Keep docs in sync when changing behavior or structure
+alwaysApply: false
+---
+
+# Documentation updates
+
+When you change **where code lives**, **user-visible behavior**, or **env vars**:
+
+1. Update `docs/FEATURE_REGISTRY.md` (paths / purpose).
+2. Update `docs/SYSTEM_STATE.md` if the change affects shipped features or known issues; bump **Last updated**.
+3. Update `.env.example` if you add or rename `process.env` variables (comments only, no secrets).
+
+For non-trivial PRs, follow `docs/DOCUMENTATION_MAINTENANCE.md`.

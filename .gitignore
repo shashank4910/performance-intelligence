@@ -22,6 +22,9 @@
 
 # misc
 .DS_Store
+
+# Cursor MCP (may contain API keys)
+.cursor/mcp.json
 *.pem
 
 # debug
@@ -32,6 +35,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -39,3 +43,16 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/lib/generated/prisma
+
+# Lighthouse run caches (Chrome profile data, 30+ MB — never commit)
+.lighthouse-tmp/
+
+# Ad-hoc Lighthouse / PageSpeed JSON dumps in repo root
+/lighthouse-*.json
+/psi-*.json
+
+# Cursor session artifacts (debug logs, scratch analyses)
+.cursor/debug-*.log
+.cursor/flipkart-*.json

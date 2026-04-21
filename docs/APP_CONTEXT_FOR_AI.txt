@@ -1,0 +1,3166 @@
+================================================================================
+PERFORMANCE INTELLIGENCE — COMPLETE STANDALONE CONTEXT FOR AI (NO REPO ACCESS)
+Single copy-paste handoff. Built from project docs. Date: 2026-03-30
+================================================================================
+SECTION 0 — HOW TO USE
+Paste this entire file into your AI context. Self-contained; no file paths required.
+Older excerpts may list features as missing that were later built; SECTION 1 ERRATA corrects.
+================================================================================
+
+SECTION 1 — ERRATA (READ FIRST)
+- Competitor analysis IS implemented: GET /api/competitor-analysis, engine/competitorAnalysis.ts,
+  dashboard Competitive Position (app/dashboard/[projectId]/page.tsx). Ignore "competitive UI missing"
+  in dated PROJECT-STATE sections.
+- Primary competitor UX: /api/competitor-analysis. Legacy: /api/compare, /api/competitive-intelligence.
+- Prisma 7: DATABASE_URL in prisma.config.ts (.env / .env.local); npm run db:push; schema may omit url.
+- PROJECT-STATE-EXTRACTION.md dated 2025-02-21: use SYSTEM_STATE / FEATURE_REGISTRY for current features;
+  keep PROJECT-STATE for formulas, prompts, data structures, known bugs.
+- Revenue workspace: detailed revenue-impact-feature-*.md describes Strategic Map / Financial toggle;
+  if FEATURE_REGISTRY conflicts, prefer the revenue feature detailed doc for workspace UI.
+
+================================================================================
+
+
+================================================================================
+SECTION 2 — AI_Context.md
+================================================================================
+
+# Performance Intelligence — AI Context
+
+This file defines the architecture, philosophy, and constraints of the project.
+
+Any AI modifying this codebase must follow these rules.
+
+**Navigation:** For where major logic lives, see `docs/FEATURE_REGISTRY.md`. For current system state and known issues, see `docs/SYSTEM_STATE.md`.
+
+---
+
+# Product Mission
+
+Performance Intelligence is a SaaS platform that converts technical website performance data into **business intelligence**.
+
+The product answers three questions:
+
+1. Where is revenue being lost due to performance?
+2. Which resources cause that loss?
+3. What fixes recover the most revenue?
+
+The system is **not a developer tool**.
+
+It is a **revenue intelligence platform for founders and product owners**.
+
+---
+
+# Core Product Principles
+
+1. **Business-first, not metric-first**
+
+Do not surface raw Lighthouse metrics without business interpretation.
+
+Always translate metrics into:
+
+- revenue risk
+- user behavior impact
+- business consequence
+
+---
+
+2. **Decision clarity over data volume**
+
+The interface must remain minimal.
+
+Avoid adding:
+
+- extra dashboards
+- unnecessary charts
+- complex analytics panels
+
+Instead prioritize:
+
+- clear fixes
+- prioritized actions
+- revenue recovery estimates
+
+---
+
+3. **Deterministic diagnostics over AI hallucination**
+
+Root cause analysis must rely primarily on:
+
+- Lighthouse audits
+- resource attribution
+- deterministic logic
+
+AI should only assist with:
+
+- explanation
+- narrative
+- communication
+
+AI must not invent technical causes.
+
+---
+
+4. **Resource-level intelligence**
+
+The system must diagnose issues at the **resource level**, not only at the metric level.
+
+Example:
+
+Bad:
+"LCP is slow"
+
+Good:
+"hero-image.webp delays LCP by 1.4 seconds"
+
+---
+
+5. **Prioritization is mandatory**
+
+Every diagnostic output must answer:
+
+"What should be fixed first?"
+
+Resources must be ranked by impact using:
+
+- revenue leak
+- execution time
+- transfer size
+- user experience severity
+
+---
+
+# System Architecture
+
+The system consists of five engines.
+
+### 1. Performance Diagnostics Engine
+
+Source: Lighthouse / PageSpeed.
+
+Produces:
+
+- metric values
+- resource attribution
+- audit data
+
+---
+
+### 2. Risk Engine
+
+Converts performance metrics into risk scores.
+
+Example categories:
+
+- Speed risk
+- UX risk
+- Conversion risk
+- Scaling risk
+
+---
+
+### 3. Revenue Impact Engine (CORTEX)
+
+Maps performance friction to revenue loss.
+
+Stages:
+
+- Visual Frustration
+- Interaction Paralysis
+- Trust Erosion
+- Infrastructure Debt
+
+---
+
+### 4. Recommendation Engine
+
+Produces deterministic technical fixes based on:
+
+- resource type
+- metric affected
+- performance characteristics
+
+Avoid generic advice.
+
+Recommendations must be contextual.
+
+---
+
+### 5. Narrative Engine
+
+Uses AI to translate technical diagnostics into business language.
+
+Used for:
+
+- executive summary
+- "why it matters" explanations
+
+AI must not invent technical causes.
+
+---
+
+# UI Philosophy
+
+The UI must remain **clean and minimal**.
+
+Avoid adding new dashboard sections unless absolutely necessary.
+
+Preferred structure:
+
+1. Overall health
+2. Revenue impact
+3. Metrics dashboard
+4. Metric drawer diagnostics
+
+Avoid clutter.
+
+---
+
+# Code Design Rules
+
+1. Prefer deterministic logic over AI reasoning.
+2. Use typed structures when possible.
+3. Keep recommendation logic centralized.
+4. Avoid duplicating recommendation rules.
+5. Separate data computation from UI rendering.
+
+---
+
+# Recommendation Engine Rules
+
+Recommendations must use available context:
+
+- resource.url
+- resource.type
+- resource.transferSize
+- resource.executionTimeMs
+- resource.affects
+
+Generic suggestions like:
+
+"Optimize this resource"
+
+are not acceptable.
+
+Each recommendation must explain:
+
+- what the problem is
+- why it matters
+- how to fix it
+
+---
+
+# Revenue Intelligence Rules
+
+Revenue estimates must include context.
+
+Every revenue number must connect to:
+
+- user behavior
+- metric degradation
+- resource impact
+
+Avoid presenting numbers without explanation.
+
+---
+
+# Design Constraints
+
+Do NOT:
+
+- turn this product into a Lighthouse clone
+- overload the UI with technical data
+- add features that do not connect to business outcomes
+
+---
+
+# Long-Term Vision
+
+The product will evolve into a **Performance Intelligence Platform** including:
+
+- performance history
+- revenue recovery tracking
+- competitive benchmarking
+- performance ROI analytics
+
+---
+
+# AI Modification Rules
+
+Any AI editing this codebase must ensure:
+
+1. Recommendations remain deterministic.
+2. UI remains uncluttered.
+3. Diagnostics remain resource-focused.
+4. Business impact remains visible.
+
+If unsure, prefer **clarity over complexity**.
+
+
+================================================================================
+SECTION 3 — ARCHITECTURE.md
+================================================================================
+
+# Performance Intelligence Engine — System Architecture
+
+Last updated: 2026-03-14
+
+This document explains the architecture of the Performance Intelligence SaaS platform.
+
+The goal of this document is to help developers and AI tools understand:
+
+• System structure  
+• Data flow  
+• Intelligence pipeline  
+• Monetization boundaries  
+• Critical logic components  
+
+The product is **not a developer tool**.  
+It is a **business intelligence platform that translates performance diagnostics into revenue impact insights.**
+
+---
+
+# 1. SYSTEM OVERVIEW
+
+Performance Intelligence analyzes a website using Lighthouse data and converts performance metrics into business intelligence:
+
+```
+Website URL
+      ↓
+PageSpeed / Lighthouse audit
+      ↓
+Metric extraction
+      ↓
+Risk scoring
+      ↓
+Revenue leak attribution
+      ↓
+Resource attribution
+      ↓
+Recommendation engine
+      ↓
+User dashboard
+```
+
+The system translates technical performance metrics into:
+
+• Revenue risk  
+• Conversion impact  
+• Business prioritization  
+• Actionable fix recommendations  
+
+---
+
+# 2. CORE SYSTEM COMPONENTS
+
+The platform consists of five major layers.
+
+---
+
+# A. Data Acquisition Layer
+
+Responsible for collecting performance data.
+
+### Source
+
+Google PageSpeed Insights API
+
+```
+GET https://www.googleapis.com/pagespeedonline/v5/runPagespeed
+```
+
+Two runs are typically executed:
+
+```
+mobile strategy
+desktop strategy
+```
+
+Returned data includes:
+
+• Lighthouse audits  
+• Performance metrics  
+• Resource details  
+• Network timing  
+
+---
+
+# B. Metric Intelligence Layer
+
+Transforms raw Lighthouse audit data into structured metrics.
+
+Location:
+
+```
+lib/metricIntelligenceEngine.ts
+```
+
+This layer extracts:
+
+```
+LCP
+FCP
+TTI
+TBT
+CLS
+Speed Index
+Main Thread Work
+Bootup Time
+TTFB
+```
+
+Output format:
+
+```
+cleanMetrics
+detailedMetrics
+metrics_for_dashboard
+```
+
+---
+
+# C. Risk Engine
+
+Location:
+
+```
+lib/riskEngine.ts
+```
+
+Converts performance metrics into risk scores.
+
+Example categories:
+
+```
+Speed risk
+UX risk
+SEO risk
+Conversion risk
+Scaling risk
+```
+
+Scores range from:
+
+```
+0 — No risk
+100 — Critical risk
+```
+
+Risk categories are combined into an **overall health score**.
+
+---
+
+# D. Revenue Intelligence Engine (CORTEX)
+
+Location:
+
+```
+lib/impactEngine/
+```
+
+This engine translates performance degradation into **revenue loss estimates**.
+
+Core logic:
+
+```
+computeCortexV2()
+```
+
+Inputs:
+
+```
+cleanMetrics
+monthlyRevenue
+traffic
+conversion assumptions
+```
+
+Outputs:
+
+```
+estimatedMonthlyLeak
+leak_by_metric
+diagnostics
+```
+
+Revenue leak represents **lost conversions due to performance friction**.
+
+---
+
+# E. Resource Attribution Engine
+
+Location:
+
+```
+lib/impactEngine/revenueLeakCalculator.ts
+```
+
+Distributes metric-level revenue leak across contributing resources.
+
+Example:
+
+```
+Metric leak: $600
+Resources:
+
+scriptA.js → $200
+imageB.jpg → $150
+fontC.woff → $120
+```
+
+Attribution formula uses weighted factors:
+
+```
+resource size
+execution time
+metric influence
+```
+
+---
+
+# F. Recommendation Engine
+
+Location:
+
+```
+components/DetailedMetricsBoard.tsx — getMetricResourceRecommendation()
+```
+
+Also: `components/RevenueRecoveryOpportunities.tsx` (getRecommendationCopy) and `lib/revenueRecoveryLabels.ts` (getActionTitleForResource, getImprovesLabelsForMetric) for Revenue Recovery cards.
+
+Generates deterministic optimization recommendations for each resource.
+
+Input:
+
+```
+metricLabel
+resource.type
+transferSize
+executionTimeMs
+causeType
+```
+
+Output:
+
+```
+action
+why
+technicalDetails
+```
+
+Recommendations are deterministic rules, not random AI text.
+
+---
+
+# 3. UI SYSTEM
+
+The main analysis UI lives in:
+
+```
+components/DetailedMetricsBoard.tsx
+```
+
+Each metric opens a **drawer panel**.
+
+Drawer contains two modes:
+
+```
+Technical Breakdown
+Financial Forensic Audit
+```
+
+---
+
+# Technical Breakdown
+
+Focus:
+
+```
+What is happening technically
+```
+
+Content:
+
+• Metric explanation  
+• Impact level  
+• Contributing resources  
+
+---
+
+# Financial Forensic Audit
+
+Focus:
+
+```
+What revenue is being lost
+```
+
+Content:
+
+• Estimated revenue leak  
+• Resource attribution  
+• Optimization recommendations  
+
+---
+
+# 4. FREE VS PRO MONETIZATION MODEL
+
+This platform uses a **diagnostic → action paywall model**.
+
+Free tier provides **diagnosis**.
+
+Pro tier provides **actionable intelligence**.
+
+**Pro check:** `userPlan === "pro"` (from stored analysis data) OR `localStorage.getItem("demoPro") === "true"`. Set in `app/dashboard/[projectId]/page.tsx`, `app/financial-report/page.tsx`, `app/report/page.tsx`. Revenue Recovery and financial-report show `LockedRevenueRecovery` when not Pro. See `docs/FEATURE_REGISTRY.md` — Paywall System.
+
+---
+
+## FREE TIER ALLOWS
+
+Users can see:
+
+• metric explanations  
+• performance impact description  
+• grouped resource categories  
+
+Example:
+
+```
+JavaScript execution bundles (4)
+Third-party scripts (3)
+Web fonts blocking render (2)
+```
+
+---
+
+## FREE TIER MUST NOT SHOW
+
+Free tier must never reveal:
+
+```
+specific resource URLs
+revenue attribution
+technical fix instructions
+optimization strategies
+```
+
+---
+
+## PRO TIER UNLOCKS
+
+Pro tier shows:
+
+```
+exact resource files
+revenue leak attribution
+technical optimization recommendations
+expected improvement
+```
+
+Example:
+
+```
+gtm.js → $202/month leak
+Recommended fix → load after first paint
+```
+
+---
+
+# 5. RECOMMENDATION STRUCTURE
+
+Each recommendation includes three parts.
+
+```
+WHY THIS MATTERS
+RECOMMENDED FIX
+EXPECTED IMPROVEMENT
+```
+
+Example:
+
+```
+WHY THIS MATTERS
+Interaction delay causes users to abandon the page.
+
+RECOMMENDED FIX
+Split this script using dynamic import or load after interaction.
+
+EXPECTED IMPROVEMENT
+Recover $202/mo in TTI revenue.
+```
+
+---
+
+# 6. PRIORITY SCORING
+
+Each resource receives a priority score.
+
+Location:
+
+```
+components/DetailedMetricsBoard.tsx — computePriorityScores(resources, attributedAmounts)
+```
+
+Formula (normalized then weighted):
+
+```
+normalizedLeak = leak / maxLeak, normalizedExec = execMs / maxExec, normalizedSize = size / maxSize
+score = 0.5 * normalizedLeak + 0.3 * normalizedExec + 0.2 * normalizedSize
+priorityScore = min(100, round(score * 100))
+```
+
+Scores are in range 0–100. Higher score = higher fix priority.
+
+---
+
+# 7. CONFIDENCE MODEL
+
+Confidence indicates how strongly a resource contributes to revenue loss.
+
+Location:
+
+```
+getConfidenceForResource()
+```
+
+Formula:
+
+```
+weight = resourceLeak / metricLeak
+```
+
+Rules:
+
+```
+weight > 0.6 → High confidence
+weight > 0.3 → Medium confidence
+else → Low confidence
+```
+
+Confidence explanation is shown to users.
+
+Example:
+
+```
+Low confidence • multiple resources contribute to this delay
+```
+
+---
+
+# 8. STORAGE
+
+Database:
+
+```
+PostgreSQL
+```
+
+ORM:
+
+```
+Prisma
+```
+
+Tables:
+
+```
+User
+Project
+ProjectBusinessProfile
+PerformanceSnapshot
+```
+
+Snapshots store historical performance data.
+
+---
+
+# 9. CACHING
+
+Location:
+
+```
+lib/cache.ts
+```
+
+Analysis results are cached for:
+
+```
+10 minutes
+```
+
+Purpose:
+
+```
+reduce PageSpeed API calls
+speed up repeat analysis
+```
+
+---
+
+# 10. RATE LIMITING
+
+Location:
+
+```
+lib/rateLimit.ts
+```
+
+Limit:
+
+```
+10 analyze requests per minute per IP
+```
+
+---
+
+# 11. DESIGN PRINCIPLES
+
+The system follows five core principles.
+
+### 1. Business-first intelligence
+
+Every output must answer:
+
+```
+How does this affect revenue?
+```
+
+---
+
+### 2. Deterministic logic
+
+Recommendations must be rule-based, not random AI text.
+
+---
+
+### 3. Minimal UI clutter
+
+The interface should remain calm and analytical.
+
+---
+
+### 4. Monetization boundary
+
+Free tier diagnoses problems.
+
+Pro tier explains **how to fix them**.
+
+---
+
+### 5. Founder-level clarity
+
+Insights should help founders prioritize fixes without deep technical knowledge.
+
+---
+
+# 12. FUTURE EXTENSIONS
+
+Planned improvements include:
+
+```
+competitor benchmarking
+historical performance trends
+conversion impact modeling
+performance opportunity scoring
+```
+
+These features will expand the intelligence layer without changing core architecture.
+
+
+
+================================================================================
+SECTION 4 — SYSTEM_STATE.md
+================================================================================
+
+# SYSTEM STATE
+
+Last updated: 2026-03-30
+
+## Product Summary
+
+Performance Intelligence is a SaaS platform that converts Lighthouse/PageSpeed performance data into business intelligence. It answers: where is revenue lost due to performance, which resources cause it, and what fixes recover the most revenue. Target users are founders and product owners; the product is revenue intelligence, not a developer tool.
+
+## Completed Systems
+
+- **Lighthouse/PageSpeed ingestion** — `GET /api/analyze`; PageSpeed Insights API (mobile + desktop)
+- **Metric intelligence engine** — `lib/metricIntelligenceEngine.ts`; extracts LCP, FCP, TTI, TBT, CLS, Speed Index, TTFB, mainThread, bootupTime, unusedJs, unusedCss; outputs cleanMetrics, detailedMetrics, metrics_for_dashboard
+- **Risk engine** — `lib/riskEngine.ts`; speed, UX, SEO, conversion, scaling risk scores (0–100); overall health score
+- **Revenue impact engine (CORTEX v2)** — `lib/impactEngine/cortexV2.ts`; stage-based curves (VISUAL_ENTRY, INTERACTION, TRUST, INFRASTRUCTURE); outputs estimatedMonthlyLeak, leak_by_metric. **Used by** `app/api/analyze/route.ts` when the logged-in user has no business profile with model inputs (or generic path).
+- **Behavior-based revenue model (locked V2)** — `lib/impactEngine/v2BehaviorModel.ts` (`computeBehaviorRevenueImpact`); **Used by** `app/api/analyze/route.ts` when a project business profile has advanced inputs or positive monthly revenue — replaces CORTEX for that run. See `docs/DECISION_LOG.md`.
+- **Resource attribution engine** — `lib/impactEngine/revenueLeakCalculator.ts`; `attributeLeakToResources()`; USA square-root weighting; distributes metric leak across resources
+- **Recommendation engine** — `components/DetailedMetricsBoard.tsx` (`getMetricResourceRecommendation`); deterministic by resource type + metric; also `components/RevenueRecoveryOpportunities.tsx` + `lib/revenueRecoveryLabels.ts` for action titles and Improves badges
+- **Financial forensic audit** — Metric drawer Financial tab (Pro); per-resource revenue, confidence, Why/Recommended fix/Expected improvement; `/financial-report` page (Pro or demo)
+- **Paywall system** — Free vs Pro gating; `isProUser` from `userPlan === "pro"` or `localStorage.demoPro === "true"`; LockedRevenueRecovery for Revenue Recovery section and financial-report when not Pro
+- **Revenue Recovery Opportunities** — `components/RevenueRecoveryOpportunities.tsx`; top fixes by recoverable revenue; action titles from filenames; Improves badges; $0 shown as "Revenue recovery potential"
+- **Priority Fixes** — `components/ActionPriorityAccordion.tsx`; two sections: (1) **Priority Fixes** — top 5 items with `totalRevenueImpact > 0` and `>= MIN_REVENUE_FOR_PRIORITY_FIX` ($1), sorted by priorityScore; header "Recover up to $X/month across Y fixes" (X = sum of revenueFixes, Y = revenueFixes.length); render safeguard excludes any $0 from the list. (2) **Additional Performance Optimizations** — items with `totalRevenueImpact === 0` or `< MIN_REVENUE_FOR_PRIORITY_FIX`, sorted by effortWeight (low first), slice(0, 5); same card layout with "Performance improvement" label. "Open Fix Guide" links to `/dashboard/[projectId]?metric={metricKey}&tab=forensic`. Pro-only full content; free users see blurred preview + CTA.
+- **Fix Guide navigation** — Dashboard reads `?metric` and `?tab` from URL; passes `initialOpenMetricKey` and `initialAuditTab` to DetailedMetricsBoard. When `tab=forensic`, the metric drawer opens (if metric valid) and the Financial Forensic Audit tab is activated; re-navigation with `tab=forensic` always shows the forensic tab. No tab param defaults to Technical Breakdown.
+- **Competitor analysis (decision-grade, decoupled)** — Not part of `GET /api/analyze`. **`GET /api/competitor-analysis`** runs `engine/competitorAnalysis.ts` only (PageSpeed fetches per URL, internal normalized scores, competitive risk cap). Response: `{ competitive_analysis }` — includes `comparison_rows`, **`comparison_snapshot`** (relative labels only; no raw metrics), `competitive_risk`, `performance_gap_score` (multi) or `comparison.gap_score` (head-to-head), etc. **Dashboard UI** (`app/dashboard/[projectId]/page.tsx`, “Competitive Position”): compact **Snapshot** table (Factor / Your Site / Competitor / Gap as Large·Medium·Small); one-line **competitive gap** from gap severity; **What this means**; **Decision** (recommended action + priority vs other risks + confidence sentence — no “LOW” badge); **Business impact** + estimated revenue at risk; **Opportunity**; fixed **Actions** list + **See Priority Fixes** (`scrollToMetric("action-priority-list")`). **`buildCompetitorDecisionIntel`** provides the **default headline** when a merged headline (e.g. slightly ahead + LOW severity) does not apply. Main analysis stores **`baselineRevenueForCompetitorAnalysis`** for optional `baselineRevenue` when calling competitor analysis. Homepage does not collect competitor URLs; flow is modal CTA on the dashboard.
+- **Auth & accounts** — Email/password signup via **`POST /api/signup`** (`app/api/signup/route.ts`) and **`app/auth/signup/page.tsx`**; Prisma **`User`** model. NextAuth at **`app/api/auth/[...nextauth]/route.ts`**. **Database:** Prisma 7 uses **`prisma.config.ts`** for the datasource URL (loads `.env` / `.env.local`); schema in **`prisma/schema.prisma`**. After schema changes or a fresh DB, run **`npm run db:push`** (alias for `prisma db push`). Client uses **`lib/prisma.ts`** (adapter-pg).
+- **Dashboard UI** — `app/dashboard/[projectId]/page.tsx`; sections (SECTION_IDS): dashboard, performance-change, revenue-impact, market, competitive-intelligence, growth-impact-roadmap, metrics-responsible, action-priority-list, ai-system-diagnosis; scroll spy; DetailedMetricsBoard, RevenueImpactCard, GrowthImpactRoadmap, ActionPriorityAccordion; **Competitive Position** as above. RevenueRecoveryOpportunities is used on `app/report/page.tsx`, not on this dashboard.
+- **Business impact labels** — `lib/revenueRecoveryLabels.ts`; metric → Improves (Conversion, UX, Speed, SEO); resource URL + metric → action title (e.g. "Remove unused CSS", "Defer analytics scripts")
+
+## Current Features
+
+- Run performance analysis (URL on home → `/api/analyze` → dashboard or report). **Main JSON does not include competitor analysis** (competitor feature is separate).
+- View overall health score and risk breakdown (speed, UX, SEO, conversion, scaling)
+- View estimated monthly revenue leak and leak by metric (CORTEX or behavior path per profile)
+- Open metric drawers: Technical tab (explanation, impact) and Financial tab (Pro: resources, revenue attribution, recommendations)
+- See contributing resources (Pro: URLs, revenue, confidence; Free: grouped categories only)
+- See recommended fixes (Pro, Financial tab only): Why / Recommended fix / Expected improvement
+- View Revenue Recovery Opportunities section (Pro: full cards with action titles, Improves badges, revenue or "Revenue recovery potential"; Free: LockedRevenueRecovery with blurred preview + CTA)
+- View Priority Fixes (Pro: revenue-impact cards with "Recover up to $X/month across Y fixes" header + Additional Performance Optimizations; Free: blurred preview + CTA). Only items with measurable revenue appear in Priority Fixes; $0 items appear in Additional Performance Optimizations. Click "Open Fix Guide" to open the metric drawer on the Financial Forensic Audit tab (`?metric=...&tab=forensic`).
+- **Competitor comparison** — From dashboard after results: modal with competitor URLs → `GET /api/competitor-analysis?url=...&competitorUrls=...` (& optional `baselineRevenue`). UI: headline (merged when ahead + low gap severity) → Snapshot table + competitive gap line → What this means → Decision (action, priority, confidence) → Business impact + revenue at risk → Opportunity → Actions + See Priority Fixes → Compare again.
+- Access `/financial-report` with `?demo=1` or Pro (else LockedRevenueRecovery)
+- Refine revenue analysis (RefineRevenueModal); Revenue Impact card; Growth Impact Roadmap
+- Run Revenue Impact Simulation workspace (`/dashboard/[projectId]/revenue-impact`) to estimate monthly revenue leak by funnel stage (Landing/Activation/Conversion) and present a business narrative: baseline revenue → at-risk revenue loss → revenue remaining after performance impact → projected total after fixes. Includes Confidence (Medium) with a plain-language explanation, performance snapshot as supporting evidence, realistic-input safeguards (soft warnings + internal caps for extreme conversion values), and auto-corrected mathematical invariants to keep ranges consistent. Guides users to the Priority Fixes section for recovery actions.
+- Demo unlock: UpgradeModal sets `localStorage.demoPro` and opens financial-report; dashboard syncs demoPro from localStorage
+
+## Known Issues
+
+- **userPlan not set by API** — `app/api/analyze/route.ts` returns `userAuthenticated` only; does not set `userPlan`. Pro access is effectively demo-only unless `userPlan` is added to stored payload elsewhere.
+- **lib/recommendationEngine.ts unused** — `generateSimpleRecommendation()` is not used; drawer uses only `getMetricResourceRecommendation()` in DetailedMetricsBoard.
+- **Duplicate recommendation logic** — RevenueRecoveryOpportunities has its own `getRecommendationCopy()`; DetailedMetricsBoard has `getMetricResourceRecommendation()`. Two sources of recommendation copy.
+- **Revenue sometimes $0** — When attribution yields $0, UI shows "Revenue recovery potential" (fixed in Revenue Recovery); metric-level leak can still be zero for some runs.
+- **In-drawer upgrade CTA only on Financial tab** — Free users see "Unlock Performance Intelligence" only when Financial tab is selected; Technical tab has no CTA.
+- **getGenericCategoryForResource** — Imported from `lib/metricDrawerMonetization` in DetailedMetricsBoard but never used.
+- **Legacy competitor HTTP routes** — `app/api/compare/route.ts` and `app/api/competitive-intelligence/route.ts` still exist; primary competitor UX uses `/api/competitor-analysis` + dashboard.
+
+## In Progress / Partially Implemented
+
+- **Business impact mapping** — Implemented in Revenue Recovery (Improves badges) and ActionPriorityAccordion (BusinessProblem); not fully unified across all surfaces.
+
+## Next Planned Improvements
+
+- Set `userPlan` in analyze API response when user has Pro (e.g. from DB) so dashboard Pro state is not demo-only.
+- Centralize recommendation copy: single engine (e.g. DetailedMetricsBoard or shared lib) used by both drawer and RevenueRecoveryOpportunities.
+- Remove or use `lib/recommendationEngine.ts`; remove unused `getGenericCategoryForResource` import.
+- Consider showing upgrade CTA on Technical tab for free users.
+- Unify business impact taxonomy (Improves / BusinessProblem) across drawer, Revenue Recovery, and Priority Fixes.
+
+
+================================================================================
+SECTION 5 — FEATURE_REGISTRY.md
+================================================================================
+
+# FEATURE REGISTRY
+
+Quick reference for where major logic lives. Use this file to navigate the codebase.
+
+---
+
+## Recommendation Engine
+
+**Location:** `components/DetailedMetricsBoard.tsx`
+
+**Function:** `getMetricResourceRecommendation(metricLabel, resource)` (~line 492)
+
+**Purpose:** Generate contextual recommendations for each resource in the metric drawer (Pro, Financial tab only).
+
+**Inputs:**
+- metricLabel (e.g. "Largest Contentful Paint (LCP)")
+- resource: url, type, transferSize, executionTimeMs, affects, causeType, urgencyLevel
+
+**Outputs:**
+- action
+- why
+- technicalDetails
+
+**Note:** `lib/recommendationEngine.ts` exports `generateSimpleRecommendation()` but is not used by the drawer.
+
+---
+
+## Revenue Recovery Recommendations (copy + labels)
+
+**Locations:**
+- `components/RevenueRecoveryOpportunities.tsx` — `getRecommendationCopy(resourceType, engineKey, displayValue)`; builds opportunity list; uses attributeLeakToResources.
+- `lib/revenueRecoveryLabels.ts` — `getActionTitleForResource(url, engineKey, resourceType)`; `getImprovesLabelsForMetric(engineKey)`; `resourceTypeFromUrl`, `getFilenameFromUrl`.
+
+**Purpose:** Action titles (e.g. "Remove unused CSS", "Defer analytics scripts") and "Improves" badges (Speed, UX, Conversion, SEO) for Revenue Recovery cards. Separate from drawer recommendation engine.
+
+---
+
+## Revenue Attribution Engine
+
+**Location:** `lib/impactEngine/revenueLeakCalculator.ts`
+
+**Functions:**
+- `attributeLeakToResources(totalLeak, resources)` — Distribute metric-level leak across resources. USA (square-root) weighting; impact level + resource size; sum of amounts equals totalLeak.
+- `calculateRevenueLeakWithModel`, `calculateRevenueLeak` — Geometric decay model (LCP/TTI).
+- `getTopFiveUnderperformers`, `distributeLeakBySeverity` — Used when leak_by_metric not provided.
+
+**Used by:** DetailedMetricsBoard, RevenueRecoveryOpportunities, ActionPriorityAccordion, app/api/analyze, app/financial-report.
+
+---
+
+## Revenue Leak (CORTEX v2)
+
+**Location:** `lib/impactEngine/cortexV2.ts`
+
+**Function:** `computeCortexV2(input)`
+
+**Purpose:** Stage-based revenue loss (VISUAL_ENTRY, INTERACTION, TRUST, INFRASTRUCTURE). Outputs estimatedMonthlyLeak, leak_by_metric, diagnostics.
+
+**Used by:** `app/api/analyze/route.ts`.
+
+---
+
+## Resource Deduplication
+
+**Location:** `components/DetailedMetricsBoard.tsx`
+
+**Function:** `deduplicateResourcesByUrl(resources, attributedAmounts)` (~line 445)
+
+**Purpose:** Merge resources that share the same URL; sum attributed amounts for duplicates. Prevents same resource appearing multiple times in drawer list.
+
+---
+
+## Priority Scoring
+
+**Location:** `components/DetailedMetricsBoard.tsx`
+
+**Function:** `computePriorityScores(resources, attributedAmounts)` (~line 733)
+
+**Purpose:** Normalized score 0–100 per resource. Formula: normalizedLeak (leak/maxLeak), normalizedExec (execMs/maxExec), normalizedSize (size/maxSize); then `0.5*normLeak + 0.3*normExec + 0.2*normSize`, scaled to 0–100. Used to order top 10 resources in drawer.
+
+---
+
+## Confidence Model
+
+**Location:** `components/DetailedMetricsBoard.tsx`
+
+**Function:** `getConfidenceForResource(resourceLeak, totalLeakForMetric, metricSeverity, numberOfResources)` (~line 766)
+
+**Purpose:** High/Medium/Low. Composite: attributionWeight (0.5) + metricSeverity (0.3) + resourceConcentration (0.2). Shown in Pro Financial tab only.
+
+---
+
+## Paywall System
+
+**Locations:**
+- `app/dashboard/[projectId]/page.tsx` — Sets `isProUser` from `(data.userPlan === "pro") || demoProUnlocked`; syncs `demoProUnlocked` from `localStorage.getItem("demoPro") === "true"` in useEffect; passes `isProUser` and `onDemoUpgrade` to DetailedMetricsBoard, RevenueRecoveryOpportunities, ActionPriorityAccordion.
+- `app/financial-report/page.tsx` — Requires `?demo=1` to allow access; then `isProUser = (stored?.data?.userPlan === "pro") || localStorage.getItem("demoPro") === "true"`. If not Pro, renders LockedRevenueRecovery (blurred preview); if Pro, full forensic audit.
+- `app/report/page.tsx` — `isProUser={demoProUnlocked}`; demoPro synced from localStorage.
+- `components/UpgradeModal.tsx` — "Complete Demo Upgrade": `localStorage.setItem("demoPro", "true")`, `onUpgraded?.()`, open `/financial-report?demo=1&metric=...&projectId=...`.
+- `components/LockedRevenueRecovery.tsx` — Locked state for Revenue Recovery: blurred preview of first 2 fixes + CTA "Unlock Performance Intelligence".
+- `components/RevenueRecoveryOpportunities.tsx` — When `!isProUser`, renders LockedRevenueRecovery; when `isProUser`, full opportunity cards.
+
+**Logic:** Pro access when `userPlan === "pro"` (from stored analysis data) OR `localStorage.getItem("demoPro") === "true"`. API does not set userPlan; only userAuthenticated is set.
+
+---
+
+## Free-Tier Grouping (drawer)
+
+**Location:** `components/DetailedMetricsBoard.tsx`
+
+**Function:** `groupResourcesForFreeTier(resources)` (~line 292)
+
+**Purpose:** Group resources by category (e.g. "JavaScript execution bundles (4)", "Third-party scripts (3)"); free tier sees only grouped list, no URLs or revenue. Uses `getCategoryKeyForGrouping`, `getResourceCategoryLabel`, URGENCY_WEIGHT.
+
+---
+
+## Priority Fixes
+
+**Location:** `components/ActionPriorityAccordion.tsx`
+
+**Purpose:** Founder-facing decision list in two sections. (1) **Priority Fixes** — only items with `totalRevenueImpact > 0` and `totalRevenueImpact >= MIN_REVENUE_FOR_PRIORITY_FIX` (1); sorted by `priorityScore` descending; `slice(0, 5)`; two-column cards (problem/fix left, revenue/effort/confidence/metric right). Header: "Recover up to $X/month across Y fixes" where X = sum(revenueFixes.totalRevenueImpact), Y = revenueFixes.length. Render safeguard: cards use `revenueFixes.filter(item => item.totalRevenueImpact > 0)` so no $0 item appears. (2) **Additional Performance Optimizations** — items with `totalRevenueImpact === 0` or `< MIN_REVENUE_FOR_PRIORITY_FIX`; sorted by `effortWeight` (low first); `slice(0, 5)`; same card layout with "Performance improvement" in place of revenue. "Open Fix Guide" links to `/dashboard/[projectId]?metric={primaryMetricKey}&tab=forensic`.
+
+**Uses:** attributeLeakToResources, leakByMetric, metricsForDashboard; getActionGroupKey, getActionGroupLabel, getImpactExplanation, getResourceGroupLabel; BusinessProblem (Speed/SEO/Conversion) per group. Receives `projectId` for Fix Guide links.
+
+---
+
+## Fix Guide navigation (metric drawer from URL)
+
+**Locations:**
+- `app/dashboard/[projectId]/page.tsx` — Reads `searchParams.get("metric")` and `searchParams.get("tab")`; passes `initialOpenMetricKey={openMetricKey}` and `initialAuditTab={openTab}` to DetailedMetricsBoard.
+- `components/DetailedMetricsBoard.tsx` — Accepts `initialOpenMetricKey` and `initialAuditTab`. Effect: when `initialOpenMetricKey` matches a metric, opens that metric’s drawer. Effect: when `initialAuditTab === "forensic"`, sets `auditTab` to `"financial"` (Financial Forensic Audit). When switching metrics, resets to Technical tab only if `initialAuditTab !== "forensic"`, so re-navigation with `?tab=forensic` always shows the forensic tab.
+
+**URL pattern:** `/dashboard/[projectId]?metric={metricKey}&tab=forensic` (e.g. `metric=load-tti&tab=forensic`). Omit `tab` to default to Technical Breakdown when opening the drawer.
+
+---
+
+## Metric Intelligence (resources per metric)
+
+**Location:** `lib/metricIntelligenceEngine.ts`
+
+**Function:** `analyzeMetric(rawAudit, metricKey)`
+
+**Purpose:** Extract contributing resources for a metric from Lighthouse audits; ContributingResource (url, type, transferSize, executionTimeMs, urgencyLevel, etc.). Used by drawer and financial-report.
+
+---
+
+## Competitor analysis (business layer)
+
+**Purpose:** Position the user vs competitors, estimate directional competitive revenue risk, and surface **decision-first** copy — without coupling to `GET /api/analyze` and without raw Lighthouse numbers in the UI.
+
+**API**
+- **`GET /api/competitor-analysis`** (`app/api/competitor-analysis/route.ts`) — Query: `url` (or `user_url`), `competitorUrls` (comma-separated, max 3), optional `baselineRevenue` (defaults via registry if omitted). Response: `{ competitive_analysis }` only. Runs **`computeCompetitorAnalysis`** in `engine/competitorAnalysis.ts` (separate PageSpeed runs per URL). Does **not** re-run CORTEX/behavior revenue engines.
+
+**Engine** (`engine/competitorAnalysis.ts`)
+- **`computeCompetitorAnalysis`** — Head-to-head vs multi mode; `performance_index`-style composite from normalized signals internally; capped competitive risk vs baseline.
+- **`comparison_rows`** — Optional table-style data (Site / Speed / Experience / Position labels) for consumers; not the primary dashboard layout.
+- **`comparison_snapshot`** — Three rows: First impression speed, Interaction readiness, User drop-off risk; columns **your_site** / **competitor** (relative labels: Faster/Slower, Smooth/Delayed, Higher/Lower risk; “Comparable” when tied); **impact** High/Medium/Low from internal gaps (UI maps to **Gap** column: Large / Medium / Small + emoji). Multi-competitor: competitor column uses **average** of competitor scores. **`buildComparisonSnapshot`** exported for reuse/testing.
+- **`competitive_risk`** — `{ monthly_risk, confidence: "low" | "medium" }` (API); dashboard maps confidence to **sentence** copy (“Moderate …”), not a “LOW” badge.
+- No LCP/CLS/INP strings in user-facing strings from this module.
+
+**Decision copy** (`lib/competitorDecisionIntel.ts`)
+- **`buildCompetitorDecisionIntel`** — Deterministic headline + narrative fields (gap bullets, business link, competitive pressure, prioritized actions, etc.). **Dashboard** uses **`decisionHeadline`** as the default title when a **merged headline** does not apply (e.g. `competitorHeadline()` — “slightly ahead” when not behind + LOW gap severity). Remaining competitor UI copy is **composed in** `app/dashboard/[projectId]/page.tsx` (helpers: `effectivePerformanceGapScore`, `gapSeverityFromScore`, `competitiveGapLine`, `whatThisMeansCopy`, `recommendedActionLine`, `priorityContextLine`, `opportunityCopy`, `competitorConfidenceLine`). No LLM.
+
+**Dashboard** (`app/dashboard/[projectId]/page.tsx`, section `competitive-intelligence`)
+- Trigger: **Compare with Competitors (Free)** → modal → fetch `/api/competitor-analysis` with stored project URL + optional `baselineRevenue` from stored analyze payload (`baselineRevenueForCompetitorAnalysis`).
+- **Render order:** Headline → **Snapshot** (compact table) + **Competitive gap** one-liner → **What this means** → **Decision** (recommended action, priority line, confidence sentence) → **Business impact** + estimated revenue at risk → **Opportunity** → **Actions** (numbered) + **See Priority Fixes** (`scrollToMetric("action-priority-list")`) → Compare again.
+
+**Related**
+- **`GET /api/analyze`** exposes **`baselineRevenueForCompetitorAnalysis`** so competitor risk aligns with the same baseline as the revenue run; does **not** include `competitive_analysis` in the response.
+- Legacy: `app/api/compare/route.ts`, `app/api/competitive-intelligence/route.ts` — not the primary dashboard flow.
+
+---
+
+## Database & Prisma
+
+**Locations:**
+- **`prisma/schema.prisma`** — Models: `User`, `Project`, `ProjectBusinessProfile`, `PerformanceSnapshot` (table names mapped with `@@map`).
+- **`prisma.config.ts`** — Prisma 7: datasource URL loaded from `.env` / `.env.local` (`DATABASE_URL`); **do not** put `url` in `schema.prisma` (Prisma 7 validation).
+- **`lib/prisma.ts`** — `PrismaClient` with `@prisma/adapter-pg` + `pg` Pool.
+
+**Scripts:** `npm run db:push` → `prisma db push` (sync schema to DB; use after clone or schema change).
+
+**Signup:** `POST /api/signup` (`app/api/signup/route.ts`) creates `User` rows; helpful errors for missing tables (`db push`) or connection (`DATABASE_URL`).
+
+---
+
+## Dashboard Sections & Scroll Spy
+
+**Location:** `app/dashboard/[projectId]/page.tsx`
+
+**SECTION_IDS:** dashboard, performance-change, revenue-impact, market, competitive-intelligence, growth-impact-roadmap, metrics-responsible, action-priority-list, ai-system-diagnosis.
+
+**Purpose:** Each section has id and ref; onScroll updates active section for sidebar highlight (useDashboardNav). Note: RevenueRecoveryOpportunities is not on this dashboard; it is used on `app/report/page.tsx`.
+
+---
+## Revenue Impact Simulation Workspace
+
+**Location:** `components/RevenueImpactWorkspace.tsx`
+
+**Route:** `app/dashboard/[projectId]/revenue-impact/page.tsx`
+
+**Purpose:** Lets users calculate revenue impact by showing a stage-based breakdown of “Your biggest revenue leaks” across `Landing`, `Activation`, and `Conversion`, including:
+- Monthly revenue leak estimate by stage (with Confidence: Medium)
+- A business narrative that shows baseline revenue, at-risk revenue loss, revenue remaining after performance impact, and projected total revenue after fixes
+- A collapsible plain-language explanation (“How this estimate works”)
+- Input realism safeguards for conversion-related fields (soft warnings + internal caps for calculations only)
+- Mathematical invariant validation to keep displayed projections within baseline and preserve consistent ranges
+- Performance snapshot as supporting evidence
+- A recovery CTA that links to `#action-priority-list` (Priority Fixes)
+
+**Data flow (high level):**
+- Loads saved business inputs and the latest stored performance snapshot for the project
+- On “Calculate revenue impact”, runs `runImpactEngine` using a snapshot derived from stored Lighthouse/PageSpeed metrics
+- Builds stage revenue losses using stage contributions derived from `result.primaryDrivers` (`getStageContributionsFromDrivers`)
+- Persists the latest run metadata back to the project business profile via `/api/project-business-profile` (PATCH)
+
+**Notes / UI behavior:**
+- Strategic Map grid and Financial Projection views are not part of the current workspace UI.
+- Sensitivity mode adjusts estimation behavior (via the impact engine); the UI provides hover microcopy for what each sensitivity level implies.
+- The “after fixes” projected revenue uses clamping/normalization so projections stay within baseline and ranges remain consistent (including soft realism caps for extreme conversion inputs).
+
+
+================================================================================
+SECTION 6 — DECISION_LOG.md
+================================================================================
+
+# DECISION: Revenue Impact Model V2
+
+## Status: LOCKED
+
+## Date: 2026-03-18
+
+## Decision
+
+We use a behavior-based model instead of penalty-based model.
+
+## Model
+
+Abandonment = 1 - Π(1 - impact_i)
+
+Metrics used:
+- LCP
+- TBT
+- INP
+- CLS
+
+Impact functions:
+- LCP → sigmoid curve
+- TBT → exponential curve
+- INP → exponential curve
+- CLS → capped linear
+
+## Reason
+
+- Matches real user behavior (compounding frustration, not additive penalties)
+- Prevents overestimation from linear stacking
+- Improves trust and credibility of revenue estimates
+
+## Replaces
+
+- conversionDrop (sum of penalties)
+- SENSITIVITY_COEFFICIENTS model
+- delaySeconds logic
+
+## Rule
+
+This model MUST NOT be changed unless:
+- Explicit override is requested
+- OR strong real-world data proves it incorrect
+
+
+================================================================================
+SECTION 7 — revenue-impact-feature-overview.md
+================================================================================
+
+# Revenue Impact Feature — Overview (Source of Truth)
+
+This document explains the Revenue Impact feature so we stay in sync and avoid confusion or deviations from the plan.
+
+---
+
+## 1. Purpose
+
+- **Translate performance gaps into revenue impact** using clear, direct language.
+- **No auto-calculation on the dashboard** — simulation runs only when the user clicks **Run simulation** in the dedicated workspace.
+- **One-time result** — results do not auto-update when performance data changes; the user must re-run to refresh.
+- **Opportunity framing only** — we talk about “revenue opportunity” and “uplift,” not “revenue loss” or scare language.
+
+---
+
+## 2. What We Do NOT Do (Strict Boundaries)
+
+- **Do not modify** the impact engine logic, sensitivity models, scoring engine, or metric intelligence.
+- **Do not change** Lighthouse processing or authentication.
+- **Do not change** the deterministic opportunity math inside `impactEngine/`.
+- **Do not run** the impact engine automatically from the dashboard or report; it runs only from the workspace when the user clicks **Run simulation**.
+- **Do not auto-recalculate** when performance snapshot or business inputs change; the user must click **Run simulation** again.
+- **Do not** show a single-point revenue prediction; we always show ranges (low / expected / high) and confidence.
+
+---
+
+## 3. Where the Feature Appears
+
+| Place | What the user sees |
+|-------|--------------------|
+| **Dashboard project page** (`/dashboard/[projectId]`) | Revenue Impact **section** with **Revenue Impact Card**. |
+| **Report page** (`/report`) | Same **Revenue Impact Card** (no `projectId`; link goes to `/dashboard`). |
+| **Sidebar** (when on a project page) | **“Revenue Impact”** link goes to the **Revenue Impact Workspace** (`/dashboard/[projectId]/revenue-impact`). |
+| **Revenue Impact Workspace** (`/dashboard/[projectId]/revenue-impact`) | Full simulation UI: business context, performance snapshot, **Run simulation**, then results (Strategic Map + Financial Projection). |
+
+The **card** is the entry point: it either invites the user to configure and run a simulation or shows last-calculated opportunity and a link to the workspace. The **workspace** is where configuration, run, and results live.
+
+---
+
+## 4. Revenue Impact Card (Dashboard Entry)
+
+- **If no business profile exists for the project:**  
+  Shows “Revenue Impact Simulation”, short description, and a single CTA: **Configure & Run Simulation →**.  
+  Does **not** call the impact engine or show numbers.
+
+- **If a business profile exists:**  
+  Shows: Business model, Monthly revenue, Last calculated opportunity (if any), Confidence, and **Open Simulation Workspace →**.
+
+- **Link behavior:**  
+  Opens `/dashboard/[projectId]/revenue-impact`. When `projectId` is present, the link can open in a new tab (`target="_blank"`).
+
+- **No auto-run:**  
+  The card never calls `runImpactEngine`. It only reads the saved profile and last result from the API.
+
+---
+
+## 5. Data: Project Business Profile (Database)
+
+- **Table:** `project_business_profile` (via Prisma model `ProjectBusinessProfile`).
+- **Stored per project:**  
+  `projectId`, `businessModelId`, `monthlyRevenue`, `advancedInputs` (JSON), `sensitivityMode`, `lastCalculatedOpportunity` (JSON), `lastConfidence`, `updatedAt`.
+- **Service:** `impactEngine/projectBusinessProfileService.ts`  
+  - `getBusinessProfile(projectId)`  
+  - `saveBusinessProfile(projectId, data)`  
+  - `updateLastCalculation(projectId, opportunityData)`  
+- **APIs:**  
+  - `GET /api/project-business-profile?projectId=...` — get profile (auth required).  
+  - `POST /api/project-business-profile` — save/upsert profile (auth required).  
+  - `PATCH /api/project-business-profile` — update only last opportunity + confidence (auth required).
+
+Business inputs are saved per project; the workspace auto-saves with a short debounce (e.g. 800 ms) and shows “Saving…” / “Saved ✓”. No schema changes to auth or other core tables beyond this additive table.
+
+---
+
+## 6. Revenue Impact Workspace (Page Structure)
+
+Single page: **Revenue Impact Simulation** for one project. Sections in order:
+
+1. **Header** — Title, project name, last updated (from business profile).
+2. **Business context panel** — Business model (from registry), monthly revenue (required), sensitivity mode (conservative / balanced / aggressive), collapsible advanced inputs. Auto-save; no auto-run.
+3. **Performance snapshot (context only)** — Read-only: overall health, LCP, TTI/INP, CLS. For context only; does not trigger simulation.
+4. **Run simulation** — Single button. Only this action runs the impact engine and updates results.
+5. **Results panel** — Shown only after a run. **View toggle:** [ Strategic Map ] [ Financial Projection ]. Default: **Strategic Map**.
+
+---
+
+## 7. Results: Two Views (Toggle)
+
+### Strategic Map (default)
+
+- **Strategic Growth Matrix** — Rows: funnel stages (Landing, Activation, Conversion). Columns: performance levers (Load Speed/LCP, Interaction/INP, Stability/CLS, Execution/Main Thread). Cells are **color only** (green / amber / red = low / medium / high impact). No numbers in cells. Overall health can be used so that when site health is low, the matrix does not appear mostly green.
+- **Hover on a cell** — Floating panel with: Impact level, Revenue leverage, Industry position (deterministic); core explanation template; optional AI refinement (1–2 sentences, cached per cell).
+- **Opportunity concentration** — Bar showing how much of the opportunity is concentrated by stage (e.g. Landing 67%, Activation 21%, Conversion 12%). Derived from deterministic stage contribution; visual only, no raw math.
+- **Industry alignment scale** — Below Baseline | Baseline | Top Quartile | Best-in-Class; current tier marked (deterministic from benchmarks).
+- **Strategic brief** — 6–8 line executive summary (AI when available; deterministic fallback otherwise). Explains where friction is, which stage to fix first, confidence. Fetched once per run; cached.
+- Short **explanatory copy** for the matrix, opportunity concentration, industry alignment, and strategic brief so each element is clear.
+
+### Financial Projection
+
+- **Existing opportunity view** — Low / Expected / High opportunity range (from impact engine).
+- **Enhancements:** % uplift vs monthly revenue (when baseline > 0), confidence tooltip, timestamp of simulation. No scare messaging; opportunity framing only.
+
+Neither view recalculates until the user clicks **Run simulation** again.
+
+---
+
+## 8. When the Impact Engine Runs
+
+- **Only in the workspace**, when the user clicks **Run simulation**.
+- **Inputs:** Current business context (model, monthly revenue, advanced inputs), latest performance snapshot for the project (from API), no competitor overlay unless explicitly wired elsewhere.
+- **Flow:**  
+  1. Persist business profile (so we have a row to update).  
+  2. Call `runImpactEngine(...)` (deterministic; no changes to this logic).  
+  3. Persist result via `updateLastCalculation(projectId, { opportunityRange, confidenceLevel })`.  
+  4. Show results in the chosen view (Strategic Map or Financial Projection).
+
+The dashboard and report **never** call `runImpactEngine`. The card only shows stored profile and last result.
+
+---
+
+## 9. Strategic Matrix (UX Layer Only)
+
+- Implemented in **`lib/strategicGrowthMatrix.ts`**.
+- **Reads only:** funnel templates, sensitivity profiles, industry benchmarks, performance snapshot. **Does not** change revenue math or impact engine.
+- Cell score combines: stage weight, metric sensitivity, performance delta vs benchmark, and (when implemented) overall health so that low site health can show more amber/red.
+- Colors: low → soft green, medium → amber, high → red. No numeric display in cells.
+
+---
+
+## 10. Report Templates (Optional Output)
+
+- **`lib/revenueImpactReportTemplate.ts`** — Two templates that **do not calculate**; they only plug in provided values.
+  - **Executive-style report** — `renderRevenueImpactReport(data)` — 8 sections (revenue snapshot, metric comparison, why it impacts revenue, primary focus, expected outcome, industry position, confidence, snapshot reference).
+  - **Founder-friendly report** — `renderFounderFriendlyRevenueReport(data)` — 9 sections (revenue snapshot, what it means, primary focus, metric gap, why it affects revenue, expected outcome, industry position, confidence, snapshot reference).
+- Callers must supply all numbers (e.g. impact range, uplift, gap); the templates only format and insert them. Used when we want to generate a downloadable or printable report from workspace data.
+
+---
+
+## 11. Principles to Avoid Deviation
+
+1. **Simulation is explicit** — Run only when the user clicks **Run simulation** in the workspace.
+2. **Results are one-time** — No auto-refresh when performance or business inputs change.
+3. **Opportunity only** — Ranges and uplift; no single-point prediction or fear-based messaging.
+4. **Engine is untouched** — All revenue math stays in `impactEngine/`; we only call it and display results.
+5. **Profile is per project** — Business context and last result stored in `project_business_profile`; dashboard card and workspace read/write via the same APIs.
+6. **Strategic Map is the default** — Financial Projection is the alternate view; both live in the same results panel after a run.
+
+---
+
+## 12. Quick Reference
+
+| Concept | Meaning |
+|--------|--------|
+| **Revenue Impact Card** | Dashboard/report entry: either “Configure & Run Simulation” or summary + “Open Simulation Workspace”. No engine run. |
+| **Revenue Impact Workspace** | Full page at `/dashboard/[projectId]/revenue-impact`: configure, run once, see Strategic Map or Financial Projection. |
+| **Business profile** | Project-level stored inputs (model, revenue, sensitivity, etc.) and last opportunity + confidence. |
+| **Run simulation** | Single action that runs the impact engine and updates stored result and UI. |
+| **Strategic Map** | Default result view: matrix (color only), opportunity concentration, industry alignment, strategic brief. |
+| **Financial Projection** | Alternate result view: opportunity range, % uplift, confidence, timestamp. |
+
+This is the intended behavior and boundaries for the Revenue Impact feature. Any change that would auto-run the engine from the card, change impact engine math, or remove the one-time explicit run should be treated as a deviation from this plan.
+
+
+================================================================================
+SECTION 8 — revenue-impact-feature-detailed.md
+================================================================================
+
+# Revenue Impact Feature — Detailed Explanation
+
+This document is the **full** description of the Revenue Impact feature: purpose, rules, files, data, APIs, UI, and flows. Use it as the single source of truth to avoid confusion or deviations.
+
+---
+
+## Part 1 — Purpose and Principles
+
+### 1.1 What the feature does
+
+- **Translates performance gaps into revenue impact** using clear, direct language.
+- Lets the user **configure business context** (model, monthly revenue, sensitivity) and **run a simulation once** to see:
+  - **Strategic Map:** where the gap matters most (matrix, opportunity concentration, industry alignment, strategic brief).
+  - **Financial Projection:** opportunity range (low / expected / high), % uplift, confidence, timestamp.
+- **No automatic calculation** anywhere except inside the dedicated workspace when the user clicks **Run simulation**.
+- **One-time result:** results do not auto-update when performance or inputs change; the user must re-run.
+- **Opportunity framing only:** we speak in terms of “revenue opportunity” and “uplift,” not “revenue loss” or fear-based messaging. We show ranges and confidence, never a single-point prediction.
+
+### 1.2 Strict boundaries (never do)
+
+- **Do not modify** the impact engine logic, sensitivity models, scoring engine, or metric intelligence in `impactEngine/`.
+- **Do not change** Lighthouse processing or authentication.
+- **Do not run** the impact engine from the dashboard or report; only from the workspace on **Run simulation**.
+- **Do not auto-recalculate** when snapshot or business inputs change.
+- **Do not** show a single-point revenue prediction; always ranges (low / expected / high) and confidence.
+- **Do not** add scare language or fake precision; keep monetary outputs rounded and tone calm.
+
+---
+
+## Part 2 — Where the feature appears (routes and UI)
+
+| Location | Route / context | What the user sees |
+|----------|-----------------|--------------------|
+| **Dashboard project page** | `/dashboard/[projectId]` | Revenue Impact **section** with **Revenue Impact Card**. Sidebar “Revenue Impact” links to workspace. |
+| **Report page** | `/report` | Same **Revenue Impact Card**; no `projectId`, so link goes to `/dashboard`. |
+| **Revenue Impact Workspace** | `/dashboard/[projectId]/revenue-impact` | Full simulation UI: header, business context, performance snapshot, **Run simulation**, results (Strategic Map / Financial Projection toggle). |
+| **Sidebar** | When path is `/dashboard/[projectId]` or `/dashboard/[projectId]/revenue-impact` | “Revenue Impact” nav item. On project page it links to `/dashboard/[projectId]/revenue-impact`; on workspace page it stays active. |
+
+- **Card** = entry point (configure CTA or summary + “Open Simulation Workspace”). Never runs the engine.
+- **Workspace** = only place where the user can run the simulation and see both Strategic Map and Financial Projection.
+
+---
+
+## Part 3 — Files and their roles
+
+### 3.1 Impact engine (read-only for this feature; do not change)
+
+| File | Role |
+|------|------|
+| `impactEngine/index.ts` | Public API: exports `runImpactEngine`, `listBusinessModelIds`, types, funnel/sensitivity/benchmark helpers. |
+| `impactEngine/impactEngineService.ts` | Runs deterministic projection + optional competitor overlay. Input: snapshot, businessInputs, businessModelId. Output: opportunityRange, primaryDrivers, confidenceLevel, etc. |
+| `impactEngine/revenueProjectionEngine.ts` | Deterministic opportunity range and primary drivers from snapshot + business inputs. |
+| `impactEngine/competitorOverlayEngine.ts` | Optional competitor adjustment of opportunity range. |
+| `impactEngine/businessModelRegistry.ts` | Registry of business models (ecommerce, saas, leadgen, aiTool, media). Each has funnelTemplateId and sensitivityProfileId. |
+| `impactEngine/funnelTemplates.ts` | Stage weights per business model (e.g. ecommerce: Landing 0.5, Product 0.3, Checkout 0.2). |
+| `impactEngine/sensitivityModels.ts` | Per-stage, per-metric sensitivity (high/medium/low). Used by projection engine and strategic matrix. |
+| `impactEngine/impactTypes.ts` | Types: PerformanceSnapshotLike, BusinessInputs, OpportunityRange, ImpactDriver, ImpactEngineOutput, etc. |
+
+### 3.2 Project business profile (storage)
+
+| File | Role |
+|------|------|
+| `impactEngine/projectBusinessProfileService.ts` | Service layer: `getBusinessProfile(projectId)`, `saveBusinessProfile(projectId, data)`, `updateLastCalculation(projectId, opportunityData)`. Uses Prisma; converts Decimal to number in responses. |
+| `prisma/schema.prisma` | Defines `ProjectBusinessProfile` model and relation to `Project`. |
+
+### 3.3 APIs
+
+| File | Role |
+|------|------|
+| `app/api/project-business-profile/route.ts` | GET (profile by projectId), POST (upsert profile), PATCH (update last opportunity + confidence). All require auth; all check project ownership via `getProjectForUser(projectId, userId)`. |
+| `app/api/projects/[projectId]/route.ts` | GET: returns project `{ id, url }` and latest performance snapshot for the workspace. Auth required. |
+| `app/api/strategic-brief/route.ts` | POST: body has businessModel, dominantStage, dominantMetric, opportunityRange, confidenceLevel, industryTier. Returns 6–8 line strategic brief (OpenAI when key set; else deterministic fallback). Auth required. |
+| `app/api/strategic-cell-refinement/route.ts` | POST: body has businessModel, stage, metric, impactLevel, industryTier, leverageLevel. Returns 1–2 sentence refinement for hover panel. Auth required. |
+
+### 3.4 Strategic matrix (UX layer only; no revenue math)
+
+| File | Role |
+|------|------|
+| `lib/strategicGrowthMatrix.ts` | `computeStrategicMatrix(businessModelId, snapshot, industryKey)`. Reads funnel templates, sensitivity profiles, industry benchmarks. Computes per-cell score (stage weight × sensitivity × performance delta vs benchmark, adjusted by overall health). Returns cells (with intensity low/medium/high), stageContributions (%), industryTier, row/col labels. Does not call impact engine. |
+| `lib/industryBenchmarks.ts` | Benchmark values (LCP, INP, CLS, TBT, healthMedian) per industry (ecommerce, fintech, saas, generic). Used by strategic matrix and tier derivation. |
+
+### 3.5 UI components
+
+| File | Role |
+|------|------|
+| `components/RevenueImpactCard.tsx` | Dashboard/report card. If no profile: “Revenue Impact Simulation” + “Configure & Run Simulation →”. If profile: business model, monthly revenue, last opportunity, confidence + “Open Simulation Workspace →”. Fetches profile via GET project-business-profile. Never calls runImpactEngine. |
+| `components/RevenueImpactWorkspace.tsx` | Full workspace: header, business context form (auto-save 800 ms), performance snapshot (read-only), Run simulation button, results panel with toggle (Strategic Map | Financial Projection). Calls runImpactEngine on Run; then PATCH to save last result. |
+| `components/StrategicMapView.tsx` | Strategic Map view: intro copy, matrix (color-only cells), hover panel (deterministic + AI refinement cached per cell), opportunity concentration bar, industry alignment scale, strategic brief (AI once per run or fallback). Uses computeStrategicMatrix and optional strategic-brief / strategic-cell-refinement APIs. |
+| `app/dashboard/[projectId]/page.tsx` | Renders Revenue Impact section with `<RevenueImpactCard projectId={projectId} />`. |
+| `app/dashboard/[projectId]/revenue-impact/page.tsx` | Renders `<RevenueImpactWorkspace projectId={projectId} />`. |
+| `app/report/page.tsx` | Renders `<RevenueImpactCard />` (no projectId). |
+| `components/DashboardSidebar.tsx` | “Revenue Impact” nav: when on a project page, links to `/dashboard/[projectId]/revenue-impact`; when on workspace, shows as active. |
+
+### 3.6 Report templates (no calculations)
+
+| File | Role |
+|------|------|
+| `lib/revenueImpactReportTemplate.ts` | `renderRevenueImpactReport(data)` — 8-section executive report. `renderFounderFriendlyRevenueReport(data)` — 9-section founder report. Both only insert provided values; caller supplies all numbers. |
+
+---
+
+## Part 4 — Database
+
+### 4.1 Table: project_business_profile
+
+- **Prisma model:** `ProjectBusinessProfile`.
+- **Fields:**
+  - `id` — cuid.
+  - `projectId` — unique, FK to Project.
+  - `businessModelId` — text (e.g. ecommerce, saas).
+  - `monthlyRevenue` — Decimal(14,2).
+  - `advancedInputs` — Json (optional).
+  - `sensitivityMode` — text: `conservative` | `balanced` | `aggressive`.
+  - `lastCalculatedOpportunity` — Json (e.g. `{ low, expected, high }`).
+  - `lastConfidence` — text (e.g. low, moderate, high).
+  - `updatedAt` — timestamp, auto-updated.
+- **Relation:** One-to-one with Project (one business profile per project).
+
+### 4.2 Related data
+
+- **Project** — id, url, userId, etc. Project has many PerformanceSnapshot and optional one ProjectBusinessProfile.
+- **PerformanceSnapshot** — projectId, timestamp, overallHealth, lcp, inp, ttfb, cls, tbt, etc. Used to build the snapshot passed to the workspace and to the impact engine / strategic matrix.
+
+---
+
+## Part 5 — APIs in detail
+
+### 5.1 GET /api/project-business-profile
+
+- **Query:** `projectId` (required).
+- **Auth:** Required; project must belong to user.
+- **Response:** `{ profile: ProjectBusinessProfileRow | null }`. Profile includes id, projectId, businessModelId, monthlyRevenue, advancedInputs, sensitivityMode, lastCalculatedOpportunity, lastConfidence, updatedAt (ISO string).
+
+### 5.2 POST /api/project-business-profile
+
+- **Body:** projectId, businessModelId, monthlyRevenue, advancedInputs (optional), sensitivityMode.
+- **Auth:** Required; project must belong to user.
+- **Behavior:** Upserts project_business_profile by projectId.
+- **Response:** `{ profile: ProjectBusinessProfileRow }`.
+
+### 5.3 PATCH /api/project-business-profile
+
+- **Body:** projectId, lastCalculatedOpportunity (object with low, expected, high), lastConfidence (string).
+- **Auth:** Required; project must belong to user.
+- **Behavior:** Updates only lastCalculatedOpportunity and lastConfidence for the project’s profile.
+- **Response:** `{ profile: { id, projectId, lastCalculatedOpportunity, lastConfidence, updatedAt } }` or 404 if no profile.
+
+### 5.4 GET /api/projects/[projectId]
+
+- **Auth:** Required; project must belong to user.
+- **Response:** `{ project: { id, url }, lastSnapshot: { id, overallHealth, lcp, inp, ttfb, cls, tbt, timestamp } | null }`.
+
+### 5.5 POST /api/strategic-brief
+
+- **Body:** businessModel, dominantStage, dominantMetric, opportunityRange, confidenceLevel, industryTier.
+- **Auth:** Required.
+- **Response:** `{ brief: string }` (6–8 lines). Uses OpenAI when OPENAI_API_KEY set; else deterministic fallback.
+
+### 5.6 POST /api/strategic-cell-refinement
+
+- **Body:** businessModel, stage, metric, impactLevel, industryTier, leverageLevel.
+- **Auth:** Required.
+- **Response:** `{ refinement: string }` (1–2 sentences). OpenAI when key set; else fallback.
+
+---
+
+## Part 6 — Impact engine (what we call, not what we change)
+
+### 6.1 When it runs
+
+- **Only** when the user clicks **Run simulation** in the workspace.
+- **Never** from the card, dashboard, or report.
+
+### 6.2 Input (ImpactEngineServiceInput)
+
+- `performanceSnapshot` — PerformanceSnapshotLike (id, overallHealth, lcp, inp, ttfb, cls, tbt, timestamp).
+- `businessInputs` — BusinessInputs (monthlyRevenue, optional mobileTrafficPercent, etc.).
+- `businessModelId` — string (e.g. ecommerce).
+- `competitorPerformance` — optional; not used by default in workspace.
+- `persistInputs` — false in workspace (simulation only).
+
+### 6.3 Output (ImpactEngineServiceResult)
+
+- `opportunityRange` — { low, expected, high }.
+- `primaryDrivers` — array of { metric, stage, influence, description }.
+- `confidenceLevel` — low | moderate | high.
+- `baselineRevenue`, `optimizedRevenueRange`, `businessModel`, `modelVersion`.
+- Optional: `competitorDelta`, `historicalRecord`.
+
+### 6.4 Flow in workspace
+
+1. Persist current form to profile (POST project-business-profile) so a row exists.
+2. Build snapshot from context’s lastSnapshot (or empty).
+3. Call `runImpactEngine({ performanceSnapshot, businessInputs, businessModelId, persistInputs: false })`.
+4. PATCH project-business-profile with `lastCalculatedOpportunity` and `lastConfidence`.
+5. Set result in state; show Strategic Map (default) or Financial Projection.
+
+---
+
+## Part 7 — Strategic growth matrix (UX only)
+
+### 7.1 Role
+
+- Provides the **Strategic Map** view: matrix, opportunity concentration, industry alignment, and inputs for the strategic brief.
+- **Does not** change revenue math; only reads funnel templates, sensitivity profiles, industry benchmarks, and snapshot.
+
+### 7.2 Input
+
+- `businessModelId` — e.g. ecommerce.
+- `snapshot` — PerformanceSnapshotLike (overallHealth, lcp, inp, cls, tbt, etc.).
+- `industryKey` — e.g. ecommerce, saas, generic (from industryBenchmarks).
+
+### 7.3 Output (StrategicMatrixResult)
+
+- **cells** — 3×4 matrix (rows: Landing, Activation, Conversion; cols: LCP, INP, CLS, MainThread). Each cell: combinedScore, intensity (low/medium/high), impactLevel, revenueLeverage, industryPosition, coreExplanation.
+- **stageContributions** — array of { stage, percent } (e.g. Landing 67%, Activation 21%, Conversion 12%).
+- **industryTier** — Below Baseline | Baseline | Top Quartile | Best-in-Class.
+- **industryTierPerMetric** — optional per-metric tier.
+- **rowLabels**, **colLabels** — for display.
+
+### 7.4 Cell score (conceptual)
+
+- Combines: stage weight (from funnel template), sensitivity level (high/medium/low → numeric), performance delta vs benchmark (per metric), and an adjustment when overall health is low so the matrix does not stay mostly green on a bad site.
+- Intensity: low (green) / medium (amber) / high (red). No numbers shown in cells.
+
+### 7.5 Hover panel (per cell)
+
+- Deterministic: Impact level, Revenue leverage, Industry position, core explanation sentence.
+- Optional AI: 1–2 sentences from strategic-cell-refinement API; **cached per cell** so we do not call on every hover.
+
+### 7.6 Strategic brief
+
+- Fetched **once per run** from strategic-brief API (or deterministic fallback if API fails or no key).
+- Inputs: businessModel, dominantStage, dominantMetric, opportunityRange, confidenceLevel, industryTier.
+- Shown below industry alignment; 6–8 lines.
+
+---
+
+## Part 8 — Revenue Impact Card (detail)
+
+### 8.1 Props
+
+- `projectId?: string | null`. When absent (e.g. on report page), card shows configure CTA and link to `/dashboard`.
+
+### 8.2 States
+
+- **Loading (and projectId set):** “Loading…”.
+- **No profile (or no projectId):** “Revenue Impact Simulation” + short description + “Configure & Run Simulation →”. Link: `/dashboard/[projectId]/revenue-impact` or `/dashboard`.
+- **Profile exists:** Business model, Monthly revenue, Last calculated opportunity (if any) in low/expected/high, Confidence badge, “Open Simulation Workspace →”.
+
+### 8.3 Behavior
+
+- Fetches profile with GET `/api/project-business-profile?projectId=...` when projectId is present.
+- Never calls runImpactEngine.
+- Link opens in new tab when projectId present (`target="_blank"`).
+
+---
+
+## Part 9 — Revenue Impact Workspace (detail)
+
+### 9.1 Sections in order
+
+1. **Header** — “Revenue Impact Simulation”, project name (from context), last updated (from profile).
+2. **Business context panel** — Business model (dropdown from registry), monthly revenue (required number), sensitivity mode (conservative | balanced | aggressive), collapsible advanced inputs (JSON). Auto-save on change (debounce 800 ms); shows “Saving…” then “Saved ✓”. Does not run simulation.
+3. **Performance snapshot** — Read-only: Overall health, LCP, TTI/INP, CLS from latest snapshot. If no snapshot, message to run analysis from home.
+4. **Run simulation** — Single button. Only action that runs the impact engine and updates stored result and UI.
+5. **Results panel** — Rendered only when `result` exists. Toggle: [ Strategic Map ] [ Financial Projection ]. Default after run: Strategic Map.
+
+### 9.2 Strategic Map view
+
+- Short explanation of matrix (rows = stages, columns = levers; color = impact; hover for details).
+- If overall health &lt; 50: note that matrix is adjusted when site is underperforming.
+- Matrix table (color-only cells), hover panel per cell (deterministic + cached AI refinement).
+- Opportunity concentration bar + short explanation.
+- Industry alignment scale + short explanation.
+- Strategic brief block + short explanation (AI or fallback).
+
+### 9.3 Financial Projection view
+
+- Opportunity range (low, expected, high) in currency.
+- If baselineRevenue &gt; 0: % uplift of expected vs monthly revenue.
+- Confidence badge with tooltip (what confidence reflects).
+- Primary drivers list.
+- Competitor delta narrative if present.
+- Timestamp: “Simulation run using performance snapshot from [date].”
+
+### 9.4 Data loading
+
+- On mount: GET project-business-profile and GET projects/[projectId] in parallel. Profile populates form; context provides project name and lastSnapshot for snapshot display and for run.
+
+---
+
+## Part 10 — Report templates (detail)
+
+### 10.1 Executive report — renderRevenueImpactReport(data)
+
+- **Input type:** RevenueImpactReportInput (current_revenue, impact_low/high, uplift_low/high, uplift_percent_low/high, primary_stage, primary_lever, metric_name, current_metric_value, industry_benchmark, gap_value, industry_alignment, confidence_level, snapshot_date).
+- **Sections (8):** Revenue Snapshot, Metric Comparison, Why This Impacts Revenue, Primary Focus, Expected Outcome, Industry Position, Confidence Statement, Snapshot Reference.
+- **Rule:** No calculations; only string insertion. Caller supplies all numbers.
+
+### 10.2 Founder-friendly report — renderFounderFriendlyRevenueReport(data)
+
+- **Input type:** FounderFriendlyReportInput (adds website_url; same monetary and metric fields).
+- **Sections (9):** Revenue Snapshot, What This Means, Primary Focus, Metric Gap, Why This Affects Revenue, Expected Outcome, Industry Position, Confidence, Snapshot Reference.
+- **Rule:** Same: no calculations; only insertion. Tone: simple, direct, product-partner style.
+
+---
+
+## Part 11 — Data flow summary
+
+1. **User on dashboard** → Card fetches profile (GET project-business-profile). If no profile → configure CTA. If profile → summary + link to workspace.
+2. **User opens workspace** → Load profile + project context (GET project-business-profile, GET projects/[projectId]). Form shows saved business context; snapshot shows latest performance.
+3. **User edits business context** → Debounced POST project-business-profile (auto-save). “Saving…” / “Saved ✓”.
+4. **User clicks Run simulation** → POST profile (ensure row), runImpactEngine(...), PATCH lastCalculatedOpportunity + lastConfidence, set result in state. UI shows Strategic Map or Financial Projection.
+5. **Strategic Map** → computeStrategicMatrix(...) from snapshot + businessModelId. Optional: one strategic-brief request per run; per-cell refinement on hover (cached).
+6. **No automatic re-run** when snapshot or inputs change; user must click Run again.
+
+---
+
+## Part 12 — Quick reference tables
+
+### 12.1 Business models (registry)
+
+| id | funnelTemplateId | sensitivityProfileId |
+|----|------------------|----------------------|
+| ecommerce | ecommerce | ecommerce |
+| saas | saas | saas |
+| leadgen | leadgen | leadgen |
+| aiTool | aiTool | aiTool |
+| media | media | media |
+
+### 12.2 Sensitivity modes (stored in profile)
+
+| Value | Use |
+|-------|-----|
+| conservative | User choice; stored and displayed. |
+| balanced | Default. |
+| aggressive | User choice. |
+
+(Engine logic is not changed by this feature; sensitivity mode is stored for UX/future use.)
+
+### 12.3 Matrix intensity → color
+
+| Intensity | Color |
+|-----------|--------|
+| low | Soft green |
+| medium | Amber |
+| high | Red |
+
+### 12.4 Industry alignment tiers
+
+Below Baseline | Baseline | Top Quartile | Best-in-Class.
+
+---
+
+## Part 13 — Principles to avoid deviation
+
+1. **Simulation is explicit** — Only “Run simulation” in the workspace triggers the impact engine.
+2. **Results are one-time** — No auto-refresh; user re-runs to update.
+3. **Opportunity only** — Ranges and uplift; no single number or fear messaging.
+4. **Engine untouched** — Revenue math lives only in impactEngine/; we only call it and display.
+5. **Profile per project** — One business profile per project; card and workspace use same APIs.
+6. **Strategic Map default** — After a run, default view is Strategic Map; Financial Projection is the other tab.
+7. **No calculations in templates** — Report templates only insert provided values; caller supplies all numbers.
+
+This is the full description of the Revenue Impact feature. Use it as the single source of truth for behavior, boundaries, and implementation details.
+
+
+================================================================================
+SECTION 9 — FORENSIC-EXTRACTION.md
+================================================================================
+
+# PERFORMANCE INTELLIGENCE — FORENSIC EXTRACTION
+
+Backup-grade technical documentation to recreate the project from scratch.
+
+---
+
+## 1. PROJECT OVERVIEW
+
+**What it does:** Next.js app that analyzes URLs via Google PageSpeed, computes risk/health scores (speed, UX, SEO, conversion, scaling), estimates revenue impact (legacy in analyze route + funnel-aware impact engine), stores snapshots for logged-in users (PostgreSQL/Prisma), and serves dashboards + Revenue Impact workspace. Uses OpenAI for narrative only (executive summary, briefs, metric explanation, diagnosis, competitive insight).
+
+**Core purpose:** Let users analyze site performance, see risk breakdowns, revenue impact, compare competitors, and run funnel-aware revenue simulations with optional stale detection.
+
+**Main flow:** Home → analyze (GET /api/analyze) → if guest: localStorage + /report (locked); if auth: snapshot saved, sessionStorage + /dashboard/{projectId}. Dashboard reads sessionStorage; Revenue Impact at /dashboard/{projectId}/revenue-impact runs runImpactEngine in memory, PATCHes profile (modelVersion, lastRunAt, lastSnapshotTimestamp).
+
+**Entry points:** /, /report, /dashboard, /dashboard/[projectId], /dashboard/[projectId]/revenue-impact, /login, /auth/signup, /performance-history; APIs: /api/analyze, /api/compare, /api/auth/[...nextauth], /api/signup, /api/save-pending-result, /api/project-business-profile, /api/projects/[projectId], /api/strategic-brief, /api/strategic-cell-refinement, /api/metric-explanation, /api/diagnosis-summary, /api/competitive-intelligence.
+
+**Architecture:** Next.js 16 App Router, React 19, API routes (serverless), PostgreSQL via Prisma 7 (pg + @prisma/adapter-pg), NextAuth credentials + JWT, PageSpeed v5 + OpenAI.
+
+---
+
+## 2. FILE STRUCTURE (CRITICAL ONLY)
+
+- **app/api/analyze/route.ts** — PageSpeed + risk + revenue + snapshot save.
+- **app/api/auth/[...nextauth]/route.ts** — NextAuth.
+- **app/api/compare/route.ts** — Multi-URL compare.
+- **app/api/project-business-profile/route.ts** — GET/POST/PATCH profile.
+- **app/api/projects/[projectId]/route.ts** — Project + last snapshot.
+- **app/api/signup/route.ts**, **app/api/save-pending-result/route.ts** — Auth + guest save.
+- **app/dashboard/layout.tsx** — Auth guard, sidebar.
+- **app/dashboard/[projectId]/page.tsx** — Report from sessionStorage.
+- **app/dashboard/[projectId]/revenue-impact/page.tsx** — RevenueImpactWorkspace.
+- **lib/auth.ts**, **lib/prisma.ts**, **lib/project.ts**, **lib/riskEngine.ts** — Auth, DB, project, risk.
+- **impactEngine/** — impactEngineService, revenueProjectionEngine, businessModelRegistry, funnelTemplates, sensitivityModels, projectBusinessProfileService, impactTypes, competitorOverlayEngine.
+- **lib/strategicGrowthMatrix.ts**, **lib/primaryStageFromDrivers.ts** — Matrix + primary stage.
+- **prisma/schema.prisma** — Full DB schema.
+- **components/RevenueImpactWorkspace.tsx**, **StrategicMapView.tsx**, **DashboardSidebar.tsx**, **RevenueImpactCard.tsx**.
+
+No middleware file. No prisma/migrations (use `npx prisma db push`).
+
+---
+
+## 3. FRONTEND
+
+- **Framework:** Next.js 16, React 19. **State:** React state + sessionStorage (pi:project:{projectId}) + localStorage (pendingAnalysisResult). **Auth:** useSession (next-auth/react).
+- **Protected routes:** dashboard/layout.tsx getServerSession → redirect /login. APIs check session for profile/projects/save-pending/brief/refinement.
+- **Guest:** Analyze without login → result in localStorage → /report with ReportLockWrapper (blur + signup CTA).
+- **Dashboard:** Scroll-spy via DashboardNavContext; sidebar links to #sections or /dashboard/{id}/revenue-impact.
+
+---
+
+## 4. BACKEND
+
+- **Rate limit:** lib/rateLimit.ts — 10 req/min per IP (x-forwarded-for); used by analyze, compare, metric-explanation, diagnosis-summary, competitive-intelligence. Returns 429 when exceeded.
+- **Validation:** analyze: url required; signup: email/password, len≥8; profile POST: projectId, businessModelId, monthlyRevenue; PATCH: lastCalculatedOpportunity (low/expected/high), lastConfidence.
+- **Errors:** 400/401/404/429/500; try/catch; fallbacks for OpenAI.
+
+---
+
+## 5. DATABASE (FULL SCHEMA)
+
+**ORM:** Prisma 7. **Connection:** lib/prisma.ts — DATABASE_URL, pg Pool, PrismaPg adapter; dev + Supabase: NODE_TLS_REJECT_UNAUTHORIZED=0, ssl rejectUnauthorized false.
+
+```prisma
+generator client { provider = "prisma-client-js" }
+datasource db { provider = "postgresql" }
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  projects  Project[]
+  @@map("user")
+}
+
+model Project {
+  id              String                  @id @default(cuid())
+  url             String
+  industry        String?
+  createdAt       DateTime                @default(now())
+  userId          String
+  user            User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots       PerformanceSnapshot[]
+  businessProfile ProjectBusinessProfile?
+  @@map("project")
+}
+
+model ProjectBusinessProfile {
+  id                       String    @id @default(cuid())
+  projectId                String    @unique
+  project                  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  businessModelId          String
+  monthlyRevenue           Decimal   @db.Decimal(14, 2)
+  advancedInputs           Json?
+  sensitivityMode          String
+  lastCalculatedOpportunity Json?
+  lastConfidence           String?
+  modelVersion             String?
+  lastRunAt                DateTime?
+  lastSnapshotTimestamp    DateTime?
+  updatedAt                DateTime  @updatedAt
+  @@map("project_business_profile")
+}
+
+model PerformanceSnapshot {
+  id            String   @id @default(cuid())
+  projectId     String
+  project       Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  timestamp     DateTime @default(now())
+  overallHealth Float?
+  lcp           Float?
+  inp           Float?
+  ttfb          Float?
+  cls           Float?
+  tbt           Float?
+  revenueRisk   Float?
+  moatScore     Float?
+  domainScores  Json?
+  competitive   Json?
+  rawAudit      Json?
+  @@map("performance_snapshot")
+}
+```
+
+No indexes beyond PK/unique. No migrations in repo — use `npx prisma db push`.
+
+---
+
+## 6. ENVIRONMENT VARIABLES
+
+| Variable | Required | Where | Purpose |
+|----------|----------|--------|---------|
+| DATABASE_URL | Yes | lib/prisma.ts, prisma.config.ts | PostgreSQL |
+| NEXTAUTH_SECRET | Yes | lib/auth.ts | JWT signing |
+| PAGESPEED_API_KEY | Yes (analyze/compare/competitive) | analyze, compare, competitive-intelligence | PageSpeed v5 |
+| OPENAI_API_KEY | No (fallbacks) | analyze, strategic-brief, strategic-cell-refinement, diagnosis-summary, competitive-intelligence, metricAIExplanation | OpenAI |
+| NODE_ENV | No | prisma, signup | Log level, errors |
+
+---
+
+## 7. BUSINESS LOGIC (FORMULAS)
+
+**Risk (lib/riskEngine.ts):** linearRisk(v, low, high) = 0 if v≤low, 100 if v≥high, else linear. clampScore = round(clamp(v,0,100)).
+- Speed: 0.4*lcpRisk(2500,5000)+0.35*tbtRisk(300,600)+0.25*speedIndexRisk(3000,6000).
+- UX: 0.4*clsRisk(0.1,0.25)+0.35*inpRisk(200,500)+0.25*tbtRisk.
+- SEO: 0.5*lcpRisk+0.25*fcpRisk(1800,3000)+0.25*speedIndexRisk.
+- Conversion: 0.35*lcp+0.35*inp+0.3*tbt.
+- Scaling: 0.35*domRisk(1500,3000)+0.35*mainThreadRisk(3000,6000)+0.3*tbt.
+- Overall health: 100 − weighted sum (speed 0.3, ux 0.25, seo 0.15, conversion 0.2, scaling 0.1).
+
+**Revenue risk:** base = 0.4*speed+0.4*conversion+0.2*ux; LCP/INP severity + mobile weight adjustment; clampScore. Levels: ≥75 Critical, ≥50 High, ≥30 Moderate.
+
+**Revenue projection (impactEngine):** gapFromIdeal(health); lcpImpact/timingImpact/clsImpact; INFLUENCE_FACTOR high/medium/low → score per stage×metric; totalInfluence *= ELASTICITY_MULTIPLIER (conservative 0.75, balanced 1, aggressive 1.25); cap 0.35; rawOpportunityPct = min(cap, totalInfluence + healthGap*0.08); toOpportunityRange: low 0.6×, expected 1×, high 1.4×.
+
+**Strategic matrix:** cellScore = stageWeight × sensitivityValue × normalizedPerformanceGap × normalizedStageInfluenceFromEngine; intensity 0–0.33 low, 0.34–0.66 medium, 0.67–1 high; blue only.
+
+**Primary stage:** primaryDrivers grouped by stage; sum influence (high 3, medium 2, low 1); max sum = primaryStage.
+
+---
+
+## 8. EXTERNAL INTEGRATIONS
+
+- **PageSpeed:** GET https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=...&strategy=mobile|desktop&key=PAGESPEED_API_KEY. Response: lighthouseResult.audits, categories.performance.score.
+- **OpenAI:** gpt-4o-mini, temperature 0.2–0.3; JSON or text per route; fallbacks when key missing or error.
+
+---
+
+## 9. AUTH & USER
+
+- User: id, email (unique), password (bcrypt 12), createdAt. NextAuth Credentials; JWT 30 days; session.user.id, session.user.email. No roles.
+
+---
+
+## 10. PERFORMANCE HISTORY
+
+- Snapshots: prisma.performanceSnapshot.create on analyze (auth); save-pending-result for guest after signup. getLastSnapshots(projectId, 2); computePerformanceDelta(current, previous) → performanceChange in analyze response. No trend UI/chart.
+
+---
+
+## 11. ERROR HANDLING
+
+- 400 validation/JSON; 401 auth; 404; 429 rate limit; 500 + message. Lighthouse fail → 500; desktop run catch → keep mobile. OpenAI fallbacks.
+
+---
+
+## 12. DEPLOYMENT
+
+- Build: `npm run build`. Start: `npm run start`. Env: .env / .env.local; prisma.config.ts loads both. No CI/CD or Docker in repo.
+
+---
+
+## 13. SECURITY
+
+- URL validation; signup trim/lower email, password length; projectId via getProjectForUser(userId). API keys server-side. bcrypt 12.
+
+---
+
+## 14. REBUILD STEPS
+
+1. Clone; Node 20+; `npm install`.
+2. `.env.local`: DATABASE_URL, NEXTAUTH_SECRET, PAGESPEED_API_KEY, OPENAI_API_KEY (optional).
+3. `npx prisma db push` then `npx prisma generate`.
+4. `npm run dev`; test GET /api/analyze?url=https://example.com&revenue=0&mobileShare=100&industry=general.
+5. Signup → login → analyze → dashboard; Revenue Impact at /dashboard/{projectId}/revenue-impact.
+
+
+================================================================================
+SECTION 10 — raw-audit-upgrade.md
+================================================================================
+
+# Raw Audit Storage Upgrade
+
+## 1. Prisma schema
+
+`PerformanceSnapshot` has an optional column:
+
+- `rawAudit Json?`
+
+No existing columns were removed.
+
+## 2. /api/analyze changes
+
+- After fetching the PageSpeed response, `lighthouseResult` is taken from `pageSpeedData.lighthouseResult`.
+- Before saving, heavy fields are removed via `trimLighthouseForStorage()`:
+  - `lighthouseResult.fullPageScreenshot`
+  - `lighthouseResult.audits["screenshot-thumbnails"]`
+  - `lighthouseResult.audits["final-screenshot"]`
+- The trimmed object is stored as `rawAudit` in `performanceSnapshot.create()`.
+- Metric extraction and API response shape are unchanged.
+
+## 3. Safe deletion logic
+
+In `trimLighthouseForStorage`:
+
+1. Deep-clone the lighthouse result so the original is not mutated.
+2. `delete trimmed.fullPageScreenshot`
+3. If `trimmed.audits` exists: `delete audits["screenshot-thumbnails"]`, `delete audits["final-screenshot"]`
+4. Return the trimmed object (keeps `audits`, `categories`, `timing`, `environment`).
+
+## 4. Migration commands
+
+From the project root:
+
+```bash
+npx prisma migrate dev --name add_raw_audit
+```
+
+For production (e.g. Supabase):
+
+```bash
+npx prisma migrate deploy
+```
+
+Then regenerate the client if needed:
+
+```bash
+npx prisma generate
+```
+
+## 5. Example saved rawAudit structure (trimmed)
+
+After a run, `rawAudit` in `performance_snapshot` looks like this (trimmed for brevity):
+
+```json
+{
+  "audits": {
+    "network-requests": {
+      "id": "network-requests",
+      "title": "Network Requests",
+      "numericValue": 42,
+      "details": { "items": [...] }
+    },
+    "render-blocking-resources": { "id": "render-blocking-resources", ... },
+    "largest-contentful-paint-element": { "id": "largest-contentful-paint-element", ... },
+    "long-tasks": { "id": "long-tasks", "details": { "items": [...] } },
+    "layout-shift-elements": { "id": "layout-shift-elements", ... },
+    "largest-contentful-paint": { ... },
+    "cumulative-layout-shift": { ... }
+  },
+  "categories": { "performance": { ... } },
+  "timing": { "total": 12345 },
+  "environment": { "networkUserAgent": "...", "hostUserAgent": "..." }
+}
+```
+
+Not present (removed to reduce size):
+
+- `fullPageScreenshot`
+- `audits["screenshot-thumbnails"]`
+- `audits["final-screenshot"]`
+
+## Verification (Supabase)
+
+After migration and one analyze as a logged-in user:
+
+1. In Table Editor, open `performance_snapshot`.
+2. Confirm a `raw_audit` column exists.
+3. Open the latest row’s `raw_audit` JSON.
+4. Check that it contains at least:
+   - `audits["network-requests"]`
+   - `audits["render-blocking-resources"]`
+   - `audits["largest-contentful-paint-element"]`
+   - `audits["long-tasks"]`
+   - `audits["layout-shift-elements"]`
+
+If those keys exist, the upgrade is successful.
+
+
+================================================================================
+SECTION 11 — RECOMMENDATION-SYSTEM-DIAGNOSTIC-REPORT.md
+================================================================================
+
+# Recommendation System — Full Implementation Diagnostic Report
+
+**Purpose:** Extract and document the complete implementation of the recommendation system, including free-tier vs pro-tier logic, for external review.  
+**No code was modified.** This document is extraction and documentation only.
+
+**Generated:** 2026-03-14
+
+---
+
+## 1. Free Tier Rendering Pipeline
+
+### 1.1 Entry point
+
+- **Component:** `components/DetailedMetricsBoard.tsx`
+- **Prop:** `isProUser` (default `false`). When `isProUser === false`, the drawer renders free-tier content.
+
+### 1.2 Free-tier branch (primary path — metric intelligence available)
+
+**Location:** `DetailedMetricsBoard.tsx` ~1274–1312 (first drawer content block).
+
+**Condition:**
+```tsx
+{!isProUser ? (
+  <>
+    <div className="flex items-center justify-between gap-2 mb-2">
+      <span className="text-sm font-semibold text-[var(--foreground)]">
+        Top contributing causes
+      </span>
+    </div>
+    <ul className="space-y-2 mb-4">
+      {groupedFreeTier.map((g, i) => (
+        <li key={i} className="text-sm text-[var(--foreground)]">
+          {g.label} ({g.count})
+        </li>
+      ))}
+    </ul>
+    {auditTab === "financial" && (
+      <div className="rounded-lg border ...">
+        ... "See exactly what is costing you revenue" ...
+        <button onClick={() => setUpgradeDemoOpen(true)}>Unlock Performance Intelligence</button>
+        ...
+      </div>
+    )}
+  </>
+) : ( ... Pro branch ... )}
+```
+
+**Data flow for free tier:**
+
+1. **Resources** come from either:
+   - `metricIntelligence?.intelligence?.contributingResources`, or
+   - Fallback from `active.resources` (dashboard metric) with type/urgency, or
+   - `getResourcesFromRawAudit(rawAudit, active.label)` when no intelligence/resources.
+2. **Attribution:** `attributeLeakToResources(leakForMetric, resourcesForAttribution)` (revenue leak calculator).
+3. **Deduplication:** `deduplicateResourcesByUrl(resources, attributedAmounts)` → `dedupedResources`.
+4. **Grouping:** `groupedFreeTier = groupResourcesForFreeTier(dedupedResources)`.
+5. **Rendering:** Free tier **does not** use `resources.map` or `displayItems`. It uses **`groupedFreeTier.map`** only, showing `g.label` and `g.count` (e.g. "JavaScript execution bundles (4)", "Third-party scripts (3)").
+
+**Free tier does NOT show:**
+
+- Per-resource URLs or filenames.
+- Revenue amounts or leak attribution.
+- Recommendations (Why / Recommended fix / Expected improvement).
+- Confidence explanation.
+- More than the grouped list and, on Financial tab only, the upgrade CTA block.
+
+### 1.3 Free-tier branch (fallback path — AI analysis with resources, no metric intelligence)
+
+**Location:** `DetailedMetricsBoard.tsx` ~1479–1526.
+
+When `shortText` is falsy but `active.resources` exists, the same pattern applies:
+
+- `groupedFallbackFreeTier = groupResourcesForFreeTier(dedupedFallbackResources)`.
+- `{!isProUser ? ( ... groupedFallbackFreeTier.map ... + Financial tab CTA ... ) : ( ... Pro fallback ... )}`.
+
+Again, free tier uses **grouped list only** (`groupedFallbackFreeTier.map`), not `fallbackDisplayItems.map`.
+
+### 1.4 Technical tab–only content (both tiers)
+
+- **Metric explanation** (short + detailed) and impact/strategic context are shown only when `auditTab === "technical"` (lines ~1256–1272). This is not gated by `isProUser`; both free and Pro see it on the Technical tab.
+
+---
+
+## 2. Pro Tier Rendering Pipeline
+
+### 2.1 Condition
+
+- **Component:** `DetailedMetricsBoard.tsx`
+- **Pro when:** `isProUser === true`.
+- **Derived:** `showFinancial = auditTab === "financial" && isProUser` (and `fallbackShowFinancial` for fallback path).
+
+### 2.2 Pro branch (primary path)
+
+**Location:** ~1313–1354.
+
+**Rendering:**
+
+1. **Financial header (Financial tab only):** If `showFinancial && leakForMetric > 0`: shows `formatCurrency(leakForMetric)/mo` and confidence + `confidenceExplanation`.
+2. **Section title:** "Top contributing resources (10 of N)" or "Contributing Resources (N)".
+3. **List:** `displayItems.slice(0, 10).map((item, idx) => { ... })` — i.e. **top 10 deduped resources**, not grouped.
+4. **Per resource (Pro):**
+   - **Display name:** `showFinancial ? truncateUrl(res.url) or res.url : getGenericResourceLabel(res.type)` — so on Financial tab Pro sees URLs/filenames; otherwise generic label.
+   - **Badges:** type, urgency, and when `showFinancial && resourceLeak > 0`: revenue badge + confidence (e.g. "$202/mo · High").
+   - **Recommendation block (only when `showFinancial && rec`):**
+     - "Why this matters" → `rec.why`
+     - "Recommended fix" → `rec.action`
+     - "Expected improvement" → "Recover $X/mo in {metric} revenue."
+
+**Recommendation generation (Pro only):**
+
+- `rec = showFinancial ? getMetricResourceRecommendation(active.label, res) : null`
+- So recommendations are **only rendered on the Financial tab for Pro users**. They are produced by `getMetricResourceRecommendation()` in `DetailedMetricsBoard.tsx` (context-aware, resource-type and metric-specific; uses filename, execution time, size thresholds).
+
+### 2.3 Pro fallback path (AI analysis with resources)
+
+**Location:** ~1428–1594.
+
+- Uses `fallbackDisplayItems.slice(0, 10).map(...)` with the same structure: resource name, badges, revenue, and when `fallbackShowFinancial && rec`: Why / Recommended fix / Expected improvement.
+- `rec = fallbackShowFinancial ? getMetricResourceRecommendation(active.label, res) : null`.
+
+### 2.4 Summary
+
+- Pro content is gated by `isProUser`. Revenue, per-resource list (top 10), confidence explanation, and recommendation blocks appear only when `isProUser` is true and (for financial/recommendations) when `auditTab === "financial"`.
+
+---
+
+## 3. Paywall Logic Implementation
+
+### 3.1 Where `isProUser` is set (sources of truth)
+
+| Location | Logic | Notes |
+|----------|--------|--------|
+| **`app/dashboard/[projectId]/page.tsx`** (lines 383–386) | `isProUser={ (typeof data.userPlan === "string" && data.userPlan === "pro") \|\| demoProUnlocked }` | Dashboard: Pro only if stored data has `userPlan === "pro"` or user has unlocked demo. **Does not** use `userAuthenticated`. |
+| **`app/report/page.tsx`** (line 253) | `isProUser={demoProUnlocked}` | Report page: Pro only when demo unlocked (from localStorage). |
+| **`components/DetailedMetricsBoard.tsx`** (line 957, 970–971) | Default `isProUser = false`; JSDoc: "Must be: user?.plan === 'pro' \|\| (typeof window !== 'undefined' && localStorage.getItem('demoPro') === 'true')" | Consumer must pass correct value; component does not read localStorage itself. |
+
+### 3.2 Where `demoPro` / demo unlock is used
+
+| Location | Code / behavior |
+|----------|-----------------|
+| **`app/dashboard/[projectId]/page.tsx`** | `const [demoProUnlocked, setDemoProUnlocked] = useState(false);` — `useEffect` reads `localStorage.getItem("demoPro") === "true"` and sets `setDemoProUnlocked(true)`. `onDemoUpgrade={() => setDemoProUnlocked(true)}` passed to `DetailedMetricsBoard`. |
+| **`app/report/page.tsx`** | Same: `demoProUnlocked` state synced from `localStorage.getItem("demoPro") === "true"`; `onDemoUpgrade` sets it true. `isProUser={demoProUnlocked}`. |
+| **`components/UpgradeModal.tsx`** | On "Complete Demo Upgrade": `localStorage.setItem("demoPro", "true")`, then `onUpgraded?.()`, close modal, open `/financial-report?metric=...&projectId=...`. |
+| **`app/financial-report/page.tsx`** | `const isPro = localStorage.getItem("demoPro") === "true";` — if not Pro, redirects to dashboard. Page is Pro-only. |
+
+### 3.3 Where `userAuthenticated` and `userPlan` come from
+
+| Location | Code |
+|----------|------|
+| **`app/api/analyze/route.ts`** | Cache hit (line ~242): `const response = { ...cached, userAuthenticated: !!session?.user };` — Full run (line ~760): response includes `userAuthenticated: !!session?.user`. **Note:** API does **not** set `userPlan`; only `userAuthenticated` is set from session. |
+| **Dashboard data** | `data` is from `stored.data` (sessionStorage). So `userAuthenticated` and `userPlan` in `data` come from the analyze API response (and any code that later adds `userPlan` to stored payload). Dashboard uses only `userPlan === "pro"` and `demoProUnlocked` for `isProUser`, not `userAuthenticated`. |
+
+### 3.4 All UI checks involving tier
+
+- **`DetailedMetricsBoard.tsx`:**
+  - `!isProUser` → render free tier (grouped list + optional Financial CTA).
+  - `isProUser` → render Pro tier (resource list, revenue, recommendations when `showFinancial`).
+  - `showFinancial = auditTab === "financial" && isProUser` — revenue and recommendation blocks only when both Financial tab and Pro.
+  - Upgrade CTA: `auditTab === "financial" && (free tier)` → show "Unlock Performance Intelligence" and open `UpgradeModal` on click (`setUpgradeDemoOpen(true)`).
+
+---
+
+## 4. Recommendation Generation Logic
+
+### 4.1 Where recommendations are generated
+
+- **Function:** `getMetricResourceRecommendation(metricLabel, resource)` in `components/DetailedMetricsBoard.tsx` (lines ~389–709).
+- **Not used:** `lib/recommendationEngine.ts` exports `generateSimpleRecommendation(resourceContext)`; it is **not** referenced in `DetailedMetricsBoard.tsx`. The drawer uses only the local context-aware `getMetricResourceRecommendation`.
+
+### 4.2 Inputs and behavior of `getMetricResourceRecommendation`
+
+- **Inputs:** `metricLabel` (e.g. "Largest Contentful Paint (LCP)"), `resource` (`ContributingResource`: url, type, transferSize, executionTimeMs, affects, causeType, etc.).
+- **Helpers used:** `getFilenameFromUrl(resource.url)`, `formatExecMs(executionTimeMs)`, `formatSizeForRec(transferSize)`, size thresholds `SIZE_500_KB`, `SIZE_1_MB`.
+- **Output:** `{ action: string; why: string; technicalDetails: string[] }`.
+- **Logic:** Deterministic rules by resource type (image, font, js/javascript, css, document/other) and metric (LCP, TTI, TBT, Speed Index, CLS, Unused JS, Bootup, TTFB, etc.). Scripts use execution severity (>500 ms vs <100 ms) and size (>500 KB, >1 MB) for fix suggestions. "Why" text is metric-specific from a fixed map.
+
+### 4.3 Where recommendations are rendered
+
+- Only in the **Pro** branch and only when **`showFinancial`** is true:
+  - Primary path: `showFinancial && rec && ( ... Why / Recommended fix / Expected improvement ... )` (lines ~1319–1333).
+  - Fallback path: `fallbackShowFinancial && rec && ( ... )` (lines ~1562–1586).
+- Free tier **never** receives or displays recommendation content.
+
+### 4.4 Resource attribution used for recommendations
+
+- **Leak:** Per-metric leak from `leakByMetric` (or derived from `estimatedMonthlyLeak` via `getTopFiveUnderperformers` / `distributeLeakBySeverity` when `leakByMetric` not provided).
+- **Attribution:** `attributeLeakToResources(leakForMetric, resourcesForAttribution)` in `lib/impactEngine/revenueLeakCalculator.ts`.
+- **Deduplication:** `deduplicateResourcesByUrl(resources, attributedAmounts)` in `DetailedMetricsBoard.tsx`.
+- **Priority:** `computePriorityScores(dedupedResources, dedupedAmounts)` — normalized 0–100; display order is by priority (top 10).
+- **Confidence:** `getConfidenceForResource(attributedLeak, leakForMetric, metricSeverity, resourceCount)` and `getConfidenceExplanation(attributedAmounts, leakForMetric)` — shown only in Pro Financial tab.
+
+---
+
+## 5. Resource Grouping Logic (Free Tier)
+
+### 5.1 `groupResourcesForFreeTier`
+
+**Location:** `components/DetailedMetricsBoard.tsx` lines 292–308.
+
+**Signature:**
+```ts
+function groupResourcesForFreeTier(resources: ContributingResource[]): ResourceGroup[]
+```
+**Type:** `ResourceGroup = { label: string; count: number; impact: number }`.
+
+**Implementation (exact):**
+```ts
+function groupResourcesForFreeTier(resources: ContributingResource[]): ResourceGroup[] {
+  const byKey = new Map<string, { label: string; count: number; impact: number }>();
+  for (const res of resources) {
+    const key = getCategoryKeyForGrouping(res);
+    const label = getResourceCategoryLabel(res);
+    const impactVal = URGENCY_WEIGHT[res.urgencyLevel] ?? 1;
+    if (byKey.has(key)) {
+      const g = byKey.get(key)!;
+      g.count += 1;
+      g.impact = Math.max(g.impact, impactVal);
+    } else {
+      byKey.set(key, { label, count: 1, impact: impactVal });
+    }
+  }
+  return [...byKey.values()].sort((a, b) => b.count - a.count || b.impact - a.impact);
+}
+```
+
+- **Category key:** `getCategoryKeyForGrouping(res)` — stable key from resource type + third-party (e.g. "js-first", "js-third", "font", "image", "css", "document", "other").
+- **Category label:** `getResourceCategoryLabel(res)` — human-readable plural (e.g. "JavaScript execution bundles", "Third-party scripts", "Web fonts blocking render", "Large image assets", "Render blocking stylesheets", "Page document", "Other resources").
+- **Impact:** `URGENCY_WEIGHT`: High=3, Medium=2, Low=1; per-group impact is max urgency in group.
+- **Sort:** By count descending, then impact descending.
+
+### 5.2 Where it is used
+
+- **Primary path:** After dedup: `groupedFreeTier = groupResourcesForFreeTier(dedupedResources)` (line 1206). Free-tier UI: `groupedFreeTier.map((g, i) => <li key={i}>{g.label} ({g.count})</li>)`.
+- **Fallback path:** `groupedFallbackFreeTier = groupResourcesForFreeTier(dedupedFallbackResources)` (line 1468). Free-tier UI: `groupedFallbackFreeTier.map((g, i) => <li key={i}>{g.label} ({g.count})</li>)`.
+
+### 5.3 UI rendering: grouped vs per-resource
+
+- **Free tier:** Uses **only** `groupedFreeTier.map` / `groupedFallbackFreeTier.map`. It does **not** use `resources.map` or `displayItems.map` for the main content.
+- **Pro tier:** Uses **only** `displayItems.slice(0, 10).map` / `fallbackDisplayItems.slice(0, 10).map`. No grouping in Pro list.
+
+---
+
+## 6. Upgrade CTA Logic
+
+### 6.1 When the upgrade CTA appears
+
+- **Condition:** User is on **Financial** tab (`auditTab === "financial"`) and is **free tier** (`!isProUser`).
+- **Placement:** Inside the same "Top contributing causes" block, below the grouped list. Two places: primary path (~1291–1311) and fallback path (~1486–1525).
+- **Content:** Card with "See exactly what is costing you revenue", short copy, and button "Unlock Performance Intelligence" that calls `setUpgradeDemoOpen(true)`.
+
+### 6.2 Modals
+
+| Modal | When shown | Effect |
+|-------|------------|--------|
+| **UpgradeModal** | `upgradeDemoOpen === true` (opened by "Unlock Performance Intelligence" in drawer). | "Complete Demo Upgrade" → `localStorage.setItem("demoPro", "true")`, `onDemoUpgrade()`, close, open `/financial-report?metric=...&projectId=...`. |
+| **ProUpgradeModal** | `proUpgradeModalOpen === true`. | "Start 14-Day Pro Trial" link to `/dashboard` (placeholder). No localStorage or demo unlock. Set by `setProUpgradeModalOpen(true)` — used elsewhere (e.g. blurred "Unlock with Pro" badge). |
+
+### 6.3 Free-tier drawer CTA
+
+- The free-tier drawer **does** contain an upgrade CTA, but **only when the user is on the Financial tab**. On the Technical tab, free users see only the grouped list and metric explanation; no CTA in the drawer.
+
+### 6.4 Other components (not used in metrics drawer)
+
+- **ReportLockWrapper:** Wraps content in blur + overlay with "Create an account to unlock..." and Sign Up / Login links when `isLocked`. Not used in `DetailedMetricsBoard` or the dashboard/report flows documented here.
+- **FixBlueprintLockedPreview:** Renders "Unlock to see Fix Blueprint" with `onUpgrade`. **Not** used in `DetailedMetricsBoard.tsx`; FixBlueprintPro is also not used in the current drawer (recommendations are inline via `getMetricResourceRecommendation`).
+
+---
+
+## 7. Identified Inconsistencies or Missing Checks
+
+### 7.1 Unused import
+
+- **`getGenericCategoryForResource`** is imported from `@/lib/metricDrawerMonetization` in `DetailedMetricsBoard.tsx` but never used. The free-tier display name uses the local **`getGenericResourceLabel(res.type)`** (and Pro uses URL/truncate or that same helper when not showFinancial). So either the import is dead or intended for future use.
+
+### 7.2 `lib/recommendationEngine.ts` unused in drawer
+
+- The shared **`generateSimpleRecommendation(resourceContext)`** in `lib/recommendationEngine.ts` is not used by `DetailedMetricsBoard`. All in-drawer recommendations come from **`getMetricResourceRecommendation`** in the component. If the intent is a single recommendation engine, consider centralizing on one or the other and documenting.
+
+### 7.3 `userPlan` not set by API
+
+- **`app/api/analyze/route.ts`** only sets **`userAuthenticated: !!session?.user`** in the response. It does **not** set `userPlan`. So on the dashboard, `data.userPlan === "pro"` can only be true if something else (e.g. another API or client) adds `userPlan` to the stored payload. Currently, dashboard Pro access is effectively **demo only** (`demoProUnlocked`) unless `userPlan` is populated elsewhere.
+
+### 7.4 ProUpgradeModal vs UpgradeModal
+
+- **ProUpgradeModal** does not set `demoPro` or call an `onUpgraded` callback; it only links to checkout/dashboard. **UpgradeModal** is the one that performs the demo unlock and opens the financial report. So any "Unlock with Pro" that should grant demo access must open **UpgradeModal**, not only ProUpgradeModal.
+
+### 7.5 CTA only on Financial tab
+
+- The in-drawer upgrade CTA ("Unlock Performance Intelligence") appears **only when the user is on the Financial tab**. If the user stays on the Technical tab, they never see this CTA in the drawer. Design choice; documented for review.
+
+### 7.6 FixBlueprintPro / FixBlueprintLockedPreview
+
+- **FixBlueprintPro** and **FixBlueprintLockedPreview** (and `getFixBlueprintSteps` from `metricDrawerMonetization`) are not used in the current drawer implementation. Recommendations are rendered inline (Why / Recommended fix / Expected improvement) from `getMetricResourceRecommendation`. No inconsistency in behavior; just a note that the FixBlueprint components exist for possible alternate UI.
+
+---
+
+## File Reference Summary
+
+| File | Role |
+|------|------|
+| `components/DetailedMetricsBoard.tsx` | Main drawer; free/Pro branching; `groupResourcesForFreeTier`; `getMetricResourceRecommendation`; upgrade CTA; uses `UpgradeModal` and `ProUpgradeModal`. |
+| `app/dashboard/[projectId]/page.tsx` | Sets `isProUser` from `userPlan === "pro"` or `demoProUnlocked`; syncs `demoPro` from localStorage; passes `onDemoUpgrade`. |
+| `app/report/page.tsx` | Sets `isProUser={demoProUnlocked}`; same demo sync and `onDemoUpgrade`. |
+| `app/api/analyze/route.ts` | Adds `userAuthenticated: !!session?.user` to response; does not set `userPlan`. |
+| `app/financial-report/page.tsx` | Pro-only page; uses `localStorage.getItem("demoPro") === "true"` to allow access. |
+| `components/UpgradeModal.tsx` | Demo upgrade: sets `demoPro`, calls `onUpgraded`, opens financial report. |
+| `components/ProUpgradeModal.tsx` | Generic Pro CTA; no demo unlock. |
+| `lib/metricIntelligenceEngine.ts` | Defines `ContributingResource`, `analyzeMetric()`; supplies resources for drawer. |
+| `lib/impactEngine/revenueLeakCalculator.ts` | `attributeLeakToResources`, `getTopFiveUnderperformers`, `distributeLeakBySeverity`. |
+| `lib/metricDrawerMonetization.ts` | `getGenericCategoryForResource`, `getFixBlueprintSteps`; FixBlueprint* components use it; drawer uses only local helpers for labels. |
+| `lib/recommendationEngine.ts` | `generateSimpleRecommendation` — not used by DetailedMetricsBoard. |
+
+---
+
+*End of diagnostic report. No code was modified.*
+
+
+================================================================================
+SECTION 12 — PROJECT-STATE-EXTRACTION.md
+================================================================================
+
+# PROJECT STATE EXTRACTION — Performance Intelligence
+
+**Purpose:** Enable another AI or developer to resume development after a long break.  
+**Date:** 2025-02-21
+
+---
+
+## 1. PROJECT PURPOSE
+
+### What This Project Builds
+
+**Performance Intelligence** is a SaaS product that turns Lighthouse/PageSpeed performance data into business-focused insights. It answers: *How does my website’s speed affect revenue, and what should I fix first?*
+
+### Target Users
+
+- **Founders and product owners** who need non-technical performance summaries
+- **Marketing and growth teams** who care about conversion impact
+- **Engineers** who want technical root causes and fix blueprints
+
+### Problem Solved
+
+- Raw Lighthouse data is hard to interpret
+- Performance impact on revenue is unclear
+- Prioritization of fixes is subjective
+- No clear link between metrics and business outcomes
+
+### How the System Works (High Level)
+
+1. User enters a URL on the home page
+2. App calls Google PageSpeed API (mobile + desktop)
+3. Lighthouse audits are processed into risk scores and revenue leak estimates
+4. AI generates executive summary and per-metric root-cause analysis
+5. User sees a dashboard with health score, risk breakdown, revenue impact, and metric-level fix blueprints
+6. Logged-in users get projects stored in PostgreSQL; guests get a blurred report with signup CTA
+
+---
+
+## 2. CURRENT ARCHITECTURE
+
+### Frontend
+
+- **Framework:** Next.js 16.1.6, React 19.2.3
+- **Styling:** Tailwind CSS 4
+- **Auth:** NextAuth.js (CredentialsProvider, JWT session)
+- **Main pages:**
+  - `/` — Home: URL input, analyze button, HeroPreview, feature cards
+  - `/report` — Guest report (blurred, localStorage `pendingAnalysisResult`)
+  - `/dashboard` — Redirects to first project
+  - `/dashboard/[projectId]` — Full report (sessionStorage `pi:project:{id}`)
+  - `/dashboard/[projectId]/revenue-impact` — Revenue Impact Workspace
+  - `/financial-report` — Pro-only financial forensic view
+  - `/performance-history` — Placeholder (redirects to login or dashboard)
+  - `/login`, `/auth/login`, `/auth/signup` — Auth flows
+
+### Backend
+
+- **API routes:** Next.js App Router (`app/api/`)
+- **Main route:** `GET /api/analyze?url=&revenue=&mobileShare=&industry=` — full analysis pipeline
+- **Other routes:**
+  - `POST /api/project-business-profile` — Create/update business profile
+  - `GET /api/project-business-profile?projectId=` — Fetch profile
+  - `PATCH /api/project-business-profile` — Update profile or calculation metadata
+  - `POST /api/cortex-narrative` — AI impact narrative
+  - `POST /api/metric-explanation` — AI metric explanation
+  - `POST /api/auth/[...nextauth]` — NextAuth handlers
+  - `POST /api/signup` — User registration
+  - `GET /api/projects/[projectId]` — Project CRUD
+  - `POST /api/compare`, `POST /api/competitive-intelligence`, `POST /api/diagnosis-summary`, `POST /api/strategic-brief`, `POST /api/strategic-cell-refinement`, `POST /api/save-pending-result` — Present but may be stubs or partial
+
+### Automation Tools
+
+- **Make.com:** Referenced only in `fix-route-structure.ps1` (PowerShell script). That script was used to fix a route structure and contains a Make.com webhook URL. The **current** `app/api/analyze/route.ts` does **not** use Make.com; it calls PageSpeed API directly. No Make.com scenarios are wired into the live app.
+
+### AI Components (OpenAI)
+
+- **Model:** `gpt-4o-mini`
+- **Usage:**
+  1. **Executive summary** — In `/api/analyze`: given metrics + risk scores → 2–4 sentence summary
+  2. **Per-metric AI analysis** — In `/api/analyze`: for each Poor/Needs Improvement metric → `rootCause`, `fixes[]`, `impact`, `difficulty`
+  3. **Metric explanation** — In `/api/metric-explanation`: `shortExplanation`, `detailedExplanation` for drawer
+  4. **Cortex narrative** — In `/api/cortex-narrative`: stage-based impact narrative (fallback used if no key)
+
+### APIs Used
+
+- **Google PageSpeed Insights v5:** `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=...&strategy=mobile|desktop&key=PAGESPEED_API_KEY`
+- **No other external APIs** in the main flow
+
+### Data Flow: URL → Report
+
+```
+User enters URL
+    ↓
+GET /api/analyze?url=...
+    ↓
+1. Rate limit check (10 req/min per IP)
+2. Cache check (getCache) — skip Lighthouse if cached
+3. PageSpeed API (mobile)
+4. Extract audits → cleanMetrics, detailedMetrics
+5. computeAllScores(cleanMetrics) → risk scores
+6. computeCortexV2(audits, monthlyRevenue) → estimatedMonthlyLeak, leak_by_metric
+7. For each Poor/Needs Improvement metric:
+   - getResourcesForMetric(auditId, audits) → resources
+   - OpenAI: rootCause, fixes, impact, difficulty (cached ai:{url}:{metricKey})
+8. OpenAI: executive_summary
+9. Desktop PageSpeed run → deviceImpact
+10. If logged in: getOrCreateProject, save PerformanceSnapshot
+11. trimLighthouseForStorage → rawAudit
+12. setCache(url, response) — excludes rawAudit, revenueImpact
+13. Return JSON
+    ↓
+Frontend: if userAuthenticated → sessionStorage + redirect /dashboard/{projectId}
+          else → localStorage pendingAnalysisResult + redirect /report
+```
+
+---
+
+## 3. FEATURES ALREADY IMPLEMENTED
+
+### 3.1 URL Performance Audit
+
+- **What:** Analyze any URL via PageSpeed API
+- **Where:** `app/api/analyze/route.ts` (GET handler)
+- **How:** Fetches mobile + desktop, extracts audits, builds `detailedMetrics`, `cleanMetrics`
+
+### 3.2 Lighthouse Metric Extraction
+
+- **What:** Map Lighthouse audits to structured metrics
+- **Where:** `app/api/analyze/route.ts` lines 280–306 (`detailedMetrics`), 379–385 (`cleanMetrics`)
+- **How:** Reads `audits["largest-contentful-paint"]`, etc.; handles TTFB fallback from LCP items
+
+### 3.3 clean_metrics Generation
+
+- **What:** Normalized metrics for risk engine
+- **Where:** `app/api/analyze/route.ts` lines 379–385
+- **Structure:** `{ lcp, cls, inp, tbt, fcp, speedIndex, domSize, mainThreadWork }` (ms or raw)
+
+### 3.4 Risk Scoring
+
+- **What:** Speed, UX, SEO, Conversion, Scaling risk scores (0–100)
+- **Where:** `lib/riskEngine.ts`
+- **How:** `computeAllScores(cleanMetrics)` → linear risk curves per metric, weighted average for overall health
+
+### 3.5 Revenue Leak Attribution (CORTEX v2)
+
+- **What:** Stage-based revenue leak: Visual Entry, Interaction, Trust, Infrastructure
+- **Where:** `lib/impactEngine/cortexV2.ts`
+- **How:** Sigmoid/exponential curves per stage, infrastructure amplifier, proportional allocation to metrics; `Σ(leakByMetric) === totalLeak`
+
+### 3.6 Per-Resource Revenue Attribution
+
+- **What:** Distribute metric leak across contributing resources
+- **Where:** `lib/impactEngine/revenueLeakCalculator.ts` — `attributeLeakToResources`
+- **How:** USA (Unified Severity Attribution) with sqrt(impactWeight × resourceSize)
+
+### 3.7 AI Root Cause Analysis (Per Metric)
+
+- **What:** For Poor/Needs Improvement metrics, OpenAI returns rootCause, fixes, impact, difficulty
+- **Where:** `app/api/analyze/route.ts` lines 424–374
+- **How:** Cached by `ai:{url}:{metricKey}` (1 hour TTL)
+
+### 3.8 Executive Summary (AI)
+
+- **What:** 2–4 sentence summary for stakeholders
+- **Where:** `app/api/analyze/route.ts` lines 458–494
+- **How:** OpenAI with metrics + risk scores; fallback on error
+
+### 3.9 Metrics Dashboard + Drawer
+
+- **What:** Sectioned metrics (Core, Load, Blocking, Backend), "View Details" opens right drawer
+- **Where:** `components/DetailedMetricsBoard.tsx`
+- **How:** Renders `metrics_for_dashboard`; drawer shows short/detailed explanation, Contributing Resources, Technical | Financial tabs, Fix Blueprint (Pro)
+
+### 3.10 Resource Extraction (API + Fallback)
+
+- **What:** Contributing resources per metric
+- **Where:** `app/api/analyze/route.ts` — `extractOffendingResources`, `getResourcesForMetric`; `components/DetailedMetricsBoard.tsx` — `getResourcesFromRawAudit`
+- **How:** API uses audit details (LCP element, render-blocking, long-tasks, etc.); board falls back to rawAudit when API returns none
+
+### 3.11 Report Lock (Guest Flow)
+
+- **What:** Blurred report + signup overlay for guests
+- **Where:** `components/ReportLockWrapper.tsx`
+- **How:** `isLocked` → blur(8px) on content, overlay with Sign Up / Login
+
+### 3.12 Demo Pro Unlock
+
+- **What:** `localStorage.demoPro = true` unlocks Pro features without payment
+- **Where:** `components/UpgradeModal.tsx`, `app/report/page.tsx`, `app/dashboard/[projectId]/page.tsx`
+- **How:** "Complete Demo Upgrade" sets flag, opens `/financial-report`
+
+### 3.13 Business Profile + Revenue Refinement
+
+- **What:** Save monthly revenue, business model, traffic per project
+- **Where:** `impactEngine/projectBusinessProfileService.ts`, `app/api/project-business-profile/route.ts`, `components/RefineRevenueModal.tsx`
+- **How:** PATCH to project-business-profile; used for CORTEX v2 monthlyRevenue
+
+### 3.14 Revenue Impact Workspace
+
+- **What:** Configure business model, monthly revenue, sensitivity; run impact engine
+- **Where:** `components/RevenueImpactWorkspace.tsx`, `impactEngine/impactEngineService.ts`
+- **How:** `runImpactEngine` → `runRevenueProjection`, optional `runCompetitorOverlay`; Strategic Map view
+
+### 3.15 Performance Snapshot Storage
+
+- **What:** Persist snapshots for logged-in users
+- **Where:** `app/api/analyze/route.ts` lines 541–593, `lib/project.ts`
+- **How:** `prisma.performanceSnapshot.create` with overallHealth, lcp, inp, ttfb, cls, tbt, revenueRisk, rawAudit
+
+### 3.16 Performance Delta
+
+- **What:** Compare current vs previous snapshot
+- **Where:** `lib/deltaEngine.ts`, used in analyze response
+- **How:** `computePerformanceDelta(current, previous)` → deltaHealth, deltaMetrics
+
+### 3.17 Rate Limiting
+
+- **What:** 10 requests per minute per IP
+- **Where:** `lib/rateLimit.ts`
+- **How:** In-memory Map; used by analyze and metric-explanation routes
+
+### 3.18 Caching
+
+- **What:** 10-minute TTL cache for analyze results
+- **Where:** `lib/cache.ts`
+- **How:** In-memory Map; rawAudit and revenueImpact excluded from cached payload
+
+### 3.19 Attribution Diagnostic
+
+- **What:** Verify attribution math (uniqueness, variance, summation)
+- **Where:** `lib/diagnostics/attributionTester.ts`
+- **How:** `runAttributionDiagnostic` + `logDiagnosticReport` at end of analyze
+
+---
+
+## 4. DATA STRUCTURES / VARIABLES
+
+### cleanMetrics (LighthouseMetrics)
+
+- **Structure:** `{ lcp, cls, inp, tbt, fcp, speedIndex, domSize, mainThreadWork }` — all numbers (ms or raw)
+- **Created:** `app/api/analyze/route.ts` lines 379–385
+- **Used:** `lib/riskEngine.ts` (computeAllScores), revenue calculations
+
+### audits_raw / pageSpeedData.lighthouseResult.audits
+
+- **Structure:** `Record<string, { numericValue?, score?, details?, ... }>`
+- **Created:** PageSpeed API response
+- **Used:** detailedMetrics, cleanMetrics, getResourcesForMetric, CORTEX v2, AI prompts
+
+### detailedMetrics
+
+- **Structure:** `{ core: { lcp, cls, inp, fcp }, load: { speedIndex, tti, ttfb }, blocking: { tbt, longTasks, bootupTime, mainThread }, backend: { ... } }`
+- **Created:** `app/api/analyze/route.ts` lines 280–306
+- **Used:** Response, frontend display
+
+### metrics_for_dashboard
+
+- **Structure:** `Array<{ metricKey, label, displayValue, verdict, aiAnalysis?, resources? }>`
+- **Created:** `app/api/analyze/route.ts` loop over SECTION_METRICS
+- **Used:** `DetailedMetricsBoard` props
+
+### analysis_result / response
+
+- **Structure:** `{ summary, overallHealth, revenueRiskScore, revenueRiskLevel, estimatedMonthlyLeak, leak_by_metric, risk_breakdown, fix_priorities, detailed_metrics, metrics_for_dashboard, rawAudit, revenueImpactInputs, deviceImpact, performanceChange?, projectId?, userAuthenticated, ... }`
+- **Created:** `app/api/analyze/route.ts` lines 502–531
+- **Used:** Frontend pages (report, dashboard)
+
+### rawAudit
+
+- **Structure:** Trimmed `lighthouseResult` (no fullPageScreenshot, screenshot-thumbnails, final-screenshot)
+- **Created:** `trimLighthouseForStorage` in analyze route
+- **Used:** Stored in response, PerformanceSnapshot.rawAudit, DetailedMetricsBoard for `getResourcesFromRawAudit`
+
+### leak_by_metric
+
+- **Structure:** `Record<string, number>` — e.g. `{ lcp: 1200, tti: 800, cls: 150 }`
+- **Created:** `computeCortexV2(...).leakByMetric`
+- **Used:** DetailedMetricsBoard for per-resource attribution, Financial Report
+
+### CortexV2Result
+
+- **Structure:** `{ totalLeak, leakByMetric, diagnostic }`
+- **Created:** `lib/impactEngine/cortexV2.ts` — `computeCortexV2`
+- **Used:** analyze route for estimatedMonthlyLeak, leak_by_metric
+
+### ContributingResource
+
+- **Structure:** `{ url, type, urgencyLevel, transferSize, reason, affects?, executionTimeMs?, ... }`
+- **Created:** `analyzeMetric` (metricIntelligenceEngine), `getResourcesFromRawAudit`, API `extractOffendingResources`
+- **Used:** DetailedMetricsBoard drawer, attributeLeakToResources
+
+### StoredProject (sessionStorage)
+
+- **Structure:** `{ url, data: analysis_result, analyzedAt }`
+- **Key:** `pi:project:{projectId}`
+- **Used:** Dashboard project page
+
+### pendingAnalysisResult (localStorage)
+
+- **Structure:** `{ url, data: analysis_result }`
+- **Used:** Guest report page, financial-report fallback
+
+---
+
+## 5. AI PROMPTS
+
+### 5.1 Executive Summary
+
+**Location:** `app/api/analyze/route.ts` lines 461–478
+
+**Full prompt:**
+```
+You are a Performance Intelligence Engine for a SaaS product.
+
+Given these Lighthouse metrics (times in ms):
+${JSON.stringify(cleanMetrics)}
+
+And these computed risk scores (0–100, higher = worse):
+- Speed: ${speedRisk}
+- UX: ${uxRisk}
+- SEO: ${seoRisk}
+- Conversion: ${conversionRisk}
+- Scaling: ${scalingRisk}
+- Overall health: ${overallHealth}/100
+
+Write a short executive summary (2–4 sentences) for a non-technical stakeholder. Focus on what matters most for the business: user experience, conversions, and scalability. Be direct and actionable.
+
+STRICT: Return only valid JSON. No markdown, no explanation outside JSON.
+
+Return EXACTLY:
+{ "executive_summary": "Your summary text here." }
+```
+
+**Expected output:** `{ executive_summary: string }`
+
+---
+
+### 5.2 Per-Metric AI Analysis (rootCause, fixes)
+
+**Location:** `app/api/analyze/route.ts` lines 424–430
+
+**Full prompt:**
+```
+You are a performance expert. For this Lighthouse metric that is failing or needs improvement:
+
+Metric: ${label}
+Value: ${displayValue}
+Lighthouse context: ${auditDesc}
+
+Return ONLY valid JSON with no markdown or extra text:
+{ "rootCause": "one short paragraph", "fixes": ["fix1", "fix2", "fix3"], "impact": "Low|Medium|High", "difficulty": "Low|Medium|High" }
+```
+
+**Expected output:** `{ rootCause, fixes, impact, difficulty }`
+
+---
+
+### 5.3 Metric Explanation (short + detailed)
+
+**Location:** `lib/metricAIExplanation.ts` — `buildMetricExplanationPrompt`
+
+**Full prompt:**
+```
+You are explaining ${name} impact to a non-technical founder.
+
+Explain:
+- What is happening
+- How it affects users
+- Why it matters for engagement or conversion
+- Why fixing it improves experience
+
+Avoid:
+- Numeric references
+- Technical jargon
+- Lighthouse mentions
+- Score discussion
+
+Keep 4–6 sentences max. Clear. Strategic. Insightful.
+
+Context: Issue type ${ctx.keyIssueType}. Contributing resources: ${ctx.totalResourceCount ?? 0}.
+
+Return ONLY valid JSON with no markdown or extra text:
+{ "shortExplanation": "2-3 sentences, plain English, no numbers", "detailedExplanation": "4-6 sentences as above" }
+```
+
+**Expected output:** `{ shortExplanation, detailedExplanation }`
+
+**Used by:** `app/api/metric-explanation/route.ts` (POST), `generateMetricAIExplanationAsync`
+
+---
+
+### 5.4 Cortex Impact Narrative
+
+**Location:** `lib/impactEngine/cortexNarrative.ts` — `getImpactNarrativePrompt`
+
+**Full prompt:**
+```
+You are a performance economics analyst.
+Explain how a performance issue in the ${stageLabel} stage causes behavioral revenue loss.
+Include the exact dollar value: ${amount}.
+Use psychologically grounded terms such as:
+- Visual Abandonment
+- Interaction Paralysis
+- Trust Erosion
+- Infrastructure Debt
+
+Keep it concise, authoritative, business-focused.
+No hype.
+No technical jargon unless necessary.
+One paragraph only.
+```
+
+**Expected output:** Free-form paragraph (no JSON)
+
+**Used by:** `app/api/cortex-narrative/route.ts` (POST) — returns `{ narrative }`; fallback used if no key or error
+
+---
+
+## 6. SCORING LOGIC
+
+### Risk Scoring (lib/riskEngine.ts)
+
+- **Speed risk:** LCP, TBT, Speed Index — linear interpolation from thresholds to 0–100
+- **UX risk:** CLS, INP, TBT
+- **SEO risk:** LCP, FCP, Speed Index
+- **Conversion risk:** LCP, INP, TBT
+- **Scaling risk:** DOM size, main thread work, TBT
+
+**Thresholds (examples):** LCP 2500–5000ms, TBT 300–600ms, CLS 0.1–0.25, etc.
+
+### Overall Health
+
+- **Formula:** `100 - weightedRisk`
+- **Weights (HEALTH_WEIGHTS):** speed 30%, ux 25%, seo 15%, conversion 20%, scaling 10%
+- **Custom weights:** Supported via `?weights=` query; `normalizeWeights` ensures sum = 1
+
+### Category Scores
+
+- Same risk scores used for `risk_breakdown` (speed_risk_score, ux_risk_score, etc.)
+- **getRiskLevel(score):** 0–39 Low, 40–69 Medium, 70–100 High
+
+### Fix Priorities
+
+- **generateFixPriorities:** Top 3 categories by `score × weight`, sorted by weighted impact
+- **priorityFromScore:** ≥70 High, ≥40 Medium, else Low
+
+### Revenue Risk Score
+
+- **calculateRevenueRiskScore:** Base = speed×0.4 + conversion×0.4 + ux×0.2; adjusted by LCP/INP severity and mobile traffic %
+
+### Business Impact (estimateBusinessImpact)
+
+- overallHealth ≥85: Minimal, 0–3%
+- ≥70: Moderate, 3–8%
+- ≥50: Significant, 8–15%
+- ≥30: Severe, 15–25%
+- else: Critical, 25%+
+
+### CORTEX v2 Leak (lib/impactEngine/cortexV2.ts)
+
+- **Stage curves:** Visual (sigmoid), Interaction (exponential), Trust (capped linear), Infrastructure (log multiplier)
+- **Final abandonment:** `1 - Π(1 - stageImpact)` × infrastructureAmplifier, capped at 0.6
+- **Total leak:** `monthlyRevenue × finalAbandonment` (or traffic×VPV×FAP if traffic provided)
+- **Leak by metric:** Proportional to impact; cent-rounding so sum === totalLeak
+
+---
+
+## 7. KNOWN BUGS
+
+### 7.1 Fallback Branch Still Has Blur/Masking (DetailedMetricsBoard)
+
+- **What:** When `active.aiAnalysis` is used (fallback path, no metricIntelligence), the drawer still shows `showFinancialBlur`, `maskRevenueForGuest`, "Click to see Revenue Recovery Plan", and `blur(4px)` for revenue.
+- **Where:** `components/DetailedMetricsBoard.tsx` lines ~966–1016 (fallback branch)
+- **Expected:** Non-Pro users should not see any revenue UI (no blur, no masked values). Pro users see full dollar badges.
+- **Root cause:** Rollback of CORTEX v3 surgical UI was done for the main branch but not for the `active.aiAnalysis` fallback.
+
+### 7.2 riskMetricMap Mismatch
+
+- **What:** `riskMetricMap` maps "Speed" → `["lcp", "ttfb", "fcp", "speedIndex"]` but metric IDs in SECTION_METRIC_IDS use keys like `core-lcp`, `load-ttfb`. `scrollToMetric` may receive `lcp` and need to resolve to `core-lcp` or the correct DOM id.
+- **Where:** `lib/riskMetricMap.ts`, `lib/scrollToMetric.ts`
+- **Impact:** "Metrics Responsible" / "Contributing Metrics" buttons may scroll to wrong or missing elements.
+
+### 7.3 JSON Parsing from OpenAI
+
+- **What:** OpenAI sometimes returns markdown-wrapped JSON or trailing text. `JSON.parse(content)` can throw.
+- **Where:** `app/api/analyze/route.ts` (executive summary, per-metric AI), `lib/metricAIExplanation.ts` (parseMetricExplanationResponse strips ```)
+- **Mitigation:** Try/catch with fallback; metric explanation has `parseMetricExplanationResponse` that strips code blocks. Executive summary and per-metric analysis do not strip markdown — may fail on malformed output.
+
+### 7.4 Performance History Placeholder
+
+- **What:** `/performance-history` is a placeholder. Authenticated users are redirected to dashboard; unauthenticated see a CTA. No actual history UI or trend charts.
+- **Where:** `app/performance-history/page.tsx`
+
+### 7.5 Prisma Datasource URL
+
+- **What:** `prisma/schema.prisma` datasource has `provider = "postgresql"` but no `url`. `prisma.config.ts` provides url via `defineConfig`. Prisma 7 uses this pattern; ensure `DATABASE_URL` is set in `.env` or `.env.local`.
+
+### 7.6 Extract Offending Resources — request.url
+
+- **What:** `extractOffendingResources` uses `item.request?.url` as fallback for URL. Some Lighthouse audit items use different shapes; `item.url` or `item.source` may be primary. The code handles this but edge cases may yield empty resources for some metrics.
+
+### 7.7 getResourcesFromRawAudit Slice
+
+- **What:** `getResourcesFromRawAudit` returns `items.slice(0, 15)`. If a metric has more than 15 resources in raw audit, the rest are dropped. User rollback spec said "do not limit count" — this may still limit display in fallback path.
+
+---
+
+## 8. INCOMPLETE FEATURES
+
+### 8.1 Performance History / Trend Tracking
+
+- **Planned:** Track performance over time, show deltas, detect regressions.
+- **Exists:** `PerformanceSnapshot` table, `computePerformanceDelta`, `getLastSnapshots`, `performanceChange` in response.
+- **Missing:** History UI, trend charts, regression alerts. Dashboard "Performance History" section is text-only.
+
+### 8.2 Competitive Intelligence
+
+- **Planned:** Compare with competitor URLs, side-by-side metrics.
+- **Exists:** `runCompetitorOverlay` in impactEngine, `competitiveIntelligence.ts`, `competitiveMultiplier.ts`, API route stubs.
+- **Missing:** UI to add competitor URLs, run comparison, display results.
+
+### 8.3 Market Position / Benchmarking
+
+- **Planned:** Industry benchmarks, "Gap to Leader".
+- **Exists:** `industryBenchmarks.ts`, HeroPreview shows "Market Position" and "Gap to Leader" as "—".
+- **Missing:** Real benchmark data, integration with HeroPreview.
+
+### 8.4 Revenue Impact Modeling (Full)
+
+- **Planned:** Funnel-aware revenue projection with sensitivity modes.
+- **Exists:** `runImpactEngine`, `runRevenueProjection`, `RevenueImpactWorkspace`, `StrategicMapView`, business profile.
+- **Missing:** Full integration with analyze flow; workspace is separate. Dashboard uses CORTEX v2 for leak, not impact engine projection.
+
+### 8.5 Save Pending Result (Guest → User)
+
+- **Planned:** When guest signs up, attach `pendingAnalysisResult` to new user/project.
+- **Exists:** `app/api/save-pending-result/route.ts` (stub or partial).
+- **Missing:** Flow from signup redirect to save and project creation.
+
+### 8.6 Compare API
+
+- **Exists:** `app/api/compare/route.ts` — implementation unknown.
+- **Missing:** Documented behavior, frontend integration.
+
+### 8.7 Strategic Brief / Cell Refinement APIs
+
+- **Exists:** `app/api/strategic-brief/route.ts`, `app/api/strategic-cell-refinement/route.ts`
+- **Missing:** Clear usage and integration points.
+
+---
+
+## 9. DATABASE / STORAGE
+
+### Database
+
+- **ORM:** Prisma 7
+- **Provider:** PostgreSQL (`DATABASE_URL` in `.env` / `.env.local`)
+
+### Tables
+
+| Table | Purpose |
+|-------|---------|
+| **user** | id, email, password (bcrypt), createdAt |
+| **project** | id, url, industry, userId, createdAt |
+| **project_business_profile** | projectId (unique), businessModelId, monthlyRevenue, advancedInputs, sensitivityMode, lastCalculatedOpportunity, lastConfidence, modelVersion, lastRunAt, lastSnapshotTimestamp, updatedAt |
+| **performance_snapshot** | id, projectId, timestamp, overallHealth, lcp, inp, ttfb, cls, tbt, revenueRisk, moatScore, domainScores, competitive, rawAudit |
+
+### What Is Stored
+
+- **User:** Credentials for login
+- **Project:** URL + industry per user
+- **ProjectBusinessProfile:** Business model, revenue, last opportunity calculation
+- **PerformanceSnapshot:** Per-run metrics + optional rawAudit (trimmed Lighthouse)
+
+### Reports
+
+- **Not stored in DB.** Analysis results live in:
+  - **sessionStorage** (`pi:project:{projectId}`) for logged-in users
+  - **localStorage** (`pendingAnalysisResult`) for guests
+- Snapshots store numeric metrics and optionally rawAudit, but the full report payload is client-side only.
+
+---
+
+## 10. FILE STRUCTURE
+
+```
+performance-intelligence/
+├── app/
+│   ├── api/
+│   │   ├── analyze/route.ts          # Main analysis pipeline
+│   │   ├── auth/[...nextauth]/route.ts
+│   │   ├── compare/route.ts
+│   │   ├── competitive-intelligence/route.ts
+│   │   ├── cortex-narrative/route.ts
+│   │   ├── diagnosis-summary/route.ts
+│   │   ├── metric-explanation/route.ts
+│   │   ├── project-business-profile/route.ts
+│   │   ├── projects/[projectId]/route.ts
+│   │   ├── save-pending-result/route.ts
+│   │   ├── signup/route.ts
+│   │   ├── strategic-brief/route.ts
+│   │   └── strategic-cell-refinement/route.ts
+│   ├── auth/
+│   │   ├── login/page.tsx
+│   │   └── signup/page.tsx
+│   ├── dashboard/
+│   │   ├── [projectId]/
+│   │   │   ├── page.tsx              # Project report
+│   │   │   └── revenue-impact/page.tsx
+│   │   └── layout.tsx
+│   ├── financial-report/page.tsx
+│   ├── performance-history/page.tsx
+│   ├── report/page.tsx               # Guest report
+│   ├── analyze/page.tsx               # Redirects to /
+│   ├── login/page.tsx
+│   ├── page.tsx                       # Home
+│   ├── layout.tsx
+│   ├── globals.css
+│   └── providers.tsx
+├── components/
+│   ├── AnimatedNumber.tsx
+│   ├── DashboardSidebar.tsx
+│   ├── DetailedMetricsBoard.tsx       # Metrics + drawer
+│   ├── FixBlueprintLockedPreview.tsx
+│   ├── FixBlueprintPro.tsx
+│   ├── GrowthImpactRoadmap.tsx
+│   ├── MetricAuditTabs.tsx
+│   ├── ProUpgradeModal.tsx
+│   ├── RefineRevenueModal.tsx
+│   ├── ReportLockWrapper.tsx
+│   ├── RevenueImpactCard.tsx
+│   ├── RevenueImpactWorkspace.tsx
+│   ├── StrategicMapView.tsx
+│   └── UpgradeModal.tsx
+├── context/
+│   └── DashboardNavContext.tsx
+├── impactEngine/
+│   ├── index.ts
+│   ├── impactEngineService.ts
+│   ├── projectBusinessProfileService.ts
+│   ├── businessModelRegistry.ts
+│   ├── revenueProjectionEngine.ts
+│   ├── competitorOverlayEngine.ts
+│   ├── funnelTemplates.ts
+│   ├── sensitivityModels.ts
+│   └── impactTypes.ts
+├── lib/
+│   ├── auth.ts
+│   ├── cache.ts
+│   ├── competitiveIntelligence.ts
+│   ├── competitiveMultiplier.ts
+│   ├── deltaEngine.ts
+│   ├── diagnostics/attributionTester.ts
+│   ├── impactEngine/
+│   │   ├── aiFilter.ts                # getSurgicalCulprits (not used after rollback)
+│   │   ├── businessModelRegistry.ts
+│   │   ├── cortexNarrative.ts
+│   │   ├── cortexV2.ts
+│   │   ├── cortexV3.ts                # Not used in drawer after rollback
+│   │   ├── revenueLeakCalculator.ts
+│   │   └── ...
+│   ├── impactIndexEngine.ts
+│   ├── industryBenchmarks.ts
+│   ├── metricAIExplanation.ts
+│   ├── metricDrawerMonetization.ts
+│   ├── metricIntelligenceEngine.ts
+│   ├── primaryStageFromDrivers.ts
+│   ├── project.ts
+│   ├── prisma.ts
+│   ├── rateLimit.ts
+│   ├── recommendationEngine.ts
+│   ├── resourceImpactEngine.ts
+│   ├── revenueImpactEngine.ts
+│   ├── riskEngine.ts
+│   ├── riskMetricMap.ts
+│   ├── scrollToMetric.ts
+│   └── ...
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+├── docs/
+│   ├── PROJECT-STATE-EXTRACTION.md    # This file
+│   ├── FORENSIC-EXTRACTION.md
+│   └── ...
+├── package.json
+├── prisma.config.ts
+└── fix-route-structure.ps1             # Legacy script (Make.com ref)
+```
+
+---
+
+## 11. LAST DEVELOPMENT STATE
+
+### Most Likely Last Focus
+
+1. **CORTEX v3 Surgical UI rollback** — Recent work removed `getSurgicalCulprits`, `runCortexV3Audit`, "Top 7 Surgical Culprits", "Verified by CORTEX-AI", and blurred revenue masking from the **main** drawer path. The **fallback** path (`active.aiAnalysis`) was not fully updated and still uses blur/masking.
+
+2. **Full-information drawer** — Goal was to show all contributing resources (no 7-cap), full text, no compact mode, and simple Pro revenue logic (show $ or hide).
+
+3. **Resource extraction robustness** — `getResourcesForMetric` and `getResourcesFromRawAudit` were extended to support more audit IDs and `request.url` so "Contributing Resources (0)" would not appear when resources exist.
+
+### Evidence
+
+- `lib/impactEngine/aiFilter.ts` exists but is no longer imported in DetailedMetricsBoard.
+- `lib/impactEngine/cortexV3.ts` exists but `runCortexV3Audit` is not used in the board.
+- Fallback branch in DetailedMetricsBoard still references `maskRevenueForGuest`, `showFinancialBlur`, "Click to see Revenue Recovery Plan".
+- Docs mention "Forensic Extraction", "revenue-impact-feature" — suggests revenue and attribution were recent focus.
+
+---
+
+## 12. NEXT DEVELOPMENT STEPS
+
+### Immediate (Bug Fixes)
+
+1. **Remove blur/masking from fallback branch** in `DetailedMetricsBoard.tsx` — align with main path: non-Pro = no revenue UI.
+2. **Fix riskMetricMap / scrollToMetric** — Ensure metric IDs match DOM ids used by the board.
+3. **Harden OpenAI JSON parsing** — Strip markdown/code blocks for executive summary and per-metric analysis, similar to `parseMetricExplanationResponse`.
+
+### Short-Term (Completeness)
+
+4. **Performance History UI** — Use `performanceChange` and snapshots to show deltas and a simple trend view.
+5. **Integrate save-pending-result** — When guest signs up after analyze, save `pendingAnalysisResult` to a new project.
+6. **Remove or repurpose `getResourcesFromRawAudit` slice(0, 15)** — If "no limit" is desired, consider increasing or removing the cap.
+
+### Medium-Term (Features)
+
+7. **Competitive Intelligence UI** — Add competitor URLs, run comparison, display in dashboard.
+8. **Market benchmarks** — Connect `industryBenchmarks.ts` to HeroPreview and dashboard.
+9. **Revenue Impact integration** — Use `runImpactEngine` output in the main dashboard flow where appropriate.
+
+### Cleanup
+
+10. **Remove dead code** — `aiFilter.ts`, `cortexV3.ts` if no longer needed.
+11. **Document or implement stub APIs** — compare, competitive-intelligence, diagnosis-summary, strategic-brief, strategic-cell-refinement.
+
+
+================================================================================
+SECTION 13 — APPENDIX: package.json scripts and dependencies (2026-03-30)
+================================================================================
+Scripts:
+  "dev": "next dev"
+  "build": "next build"
+  "start": "next start"
+  "lint": "eslint"
+  "test": "jest"
+  "db:push": "prisma db push"
+
+Dependencies (main):
+  @prisma/adapter-pg ^7.4.0, @prisma/client ^7.4.0, bcrypt ^6.0.0, next 16.1.6,
+  next-auth ^4.24.13, openai ^6.22.0, pg ^8.18.0, prisma ^7.4.0, react 19.2.3, react-dom 19.2.3
+
+Dev: @tailwindcss/postcss ^4, eslint ^9, eslint-config-next 16.1.6, jest, tailwindcss ^4, typescript ^5, etc.
+
+Typical env vars (see FORENSIC section above):
+  DATABASE_URL, NEXTAUTH_SECRET, PAGESPEED_API_KEY, OPENAI_API_KEY (optional), NODE_ENV
+
+App Router pages (app/**/page.tsx), representative routes:
+  /  (app/page.tsx)
+  /analyze  (app/analyze/page.tsx)
+  /report  (app/report/page.tsx)
+  /login  (app/login/page.tsx)
+  /auth/login, /auth/signup  (app/auth/...)
+  /dashboard  (app/dashboard/page.tsx)
+  /dashboard/[projectId]  (main project dashboard)
+  /dashboard/[projectId]/revenue-impact  (Revenue Impact Workspace)
+  /financial-report
+  /performance-history
+
+API routes under app/api/ include: analyze, auth/[...nextauth], signup, competitor-analysis,
+project-business-profile, projects/[projectId], save-pending-result, metric-explanation,
+cortex-narrative, diagnosis-summary, compare, competitive-intelligence, strategic-brief,
+strategic-cell-refinement (exact set may evolve; grep app/api for current list).
+
+================================================================================
+END OF FILE
+================================================================================

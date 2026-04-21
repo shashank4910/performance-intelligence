@@ -1,0 +1,29 @@
+---
+description: After bug fixes that require a dev server restart, restart it (do not only tell the user).
+alwaysApply: true
+---
+
+# Dev server restart after fixes
+
+When a change can only take effect after the Next.js (or other) dev process reloads, **you must restart the server yourself** in this environment—do not end with “restart the server” as the only action.
+
+## Debugging
+
+While **debugging** (reproducing a bug, applying a fix, or verifying behavior): **always restart the dev server** after code changes that affect the app or API routes before asking the user to retry—even when Turbopack would usually hot-reload—unless you are certain no server restart is needed. Prefer one clean cycle: change → restart → reproduce.
+
+## When restart is required (non-exhaustive)
+
+- `.env`, `.env.local`, or any env var read at process startup
+- `lib/prisma.ts`, database adapter, or connection init
+- `next.config.*`, middleware, instrumentation hooks
+- Changes that affect **cached** server bundles (sometimes after edits to `lib/` used only on the server)
+
+## What to do
+
+1. Check the **terminals** folder for an existing `npm run dev` / `pnpm dev` / `next dev` process.
+2. **Stop** that process if it is running, then **start** the dev server again from the project root (use the same package manager the project uses).
+3. If you cannot control the terminal, say so explicitly; otherwise **always** perform the restart after the fix.
+
+## User-facing copy
+
+You may still briefly note that a restart was required and that you ran it (or that the user should restart if the environment blocks you).

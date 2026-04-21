@@ -30,3 +30,10 @@ export function setCache(key: string, data: unknown, ttlMs?: number): void {
     expiresAt: Date.now() + ttl,
   });
 }
+
+/**
+ * Remove a key from cache. Use before a new run to avoid serving stale Lighthouse results.
+ */
+export function deleteCache(key: string): void {
+  cache.delete(key);
+}

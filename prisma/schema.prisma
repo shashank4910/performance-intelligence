@@ -1,0 +1,77 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  projects  Project[]
+
+  @@map("user")
+}
+
+model Project {
+  id                    String                  @id @default(cuid())
+  url                   String
+  industry              String?
+  createdAt             DateTime                @default(now())
+  userId                String
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  snapshots             PerformanceSnapshot[]
+  businessProfile       ProjectBusinessProfile?
+
+  @@map("project")
+}
+
+model ProjectBusinessProfile {
+  id                       String    @id @default(cuid())
+  projectId                String    @unique
+  project                  Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  businessModelId          String
+  monthlyRevenue           Decimal   @db.Decimal(14, 2)
+  advancedInputs           Json?
+  sensitivityMode          String    // conservative | balanced | aggressive
+  lastCalculatedOpportunity Json?
+  lastConfidence           String?
+  modelVersion             String?
+  lastRunAt                DateTime?
+  lastSnapshotTimestamp    DateTime?
+  updatedAt                DateTime  @updatedAt
+
+  @@map("project_business_profile")
+}
+
+model PerformanceSnapshot {
+  id             String   @id @default(cuid())
+  projectId      String
+  project        Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  timestamp      DateTime @default(now())
+  overallHealth  Float?
+  lcp            Float?
+  inp            Float?
+  ttfb           Float?
+  cls            Float?
+  tbt            Float?
+  /// Lab Time to Interactive (seconds), from Lighthouse `interactive` audit numericValue / 1000
+  tti            Float?
+  revenueRisk    Float?
+  moatScore      Float?
+  domainScores   Json?
+  competitive    Json?
+  rawAudit       Json?
+  /// Revenue Stability Monitoring — range from headline loss × sensitivity bounds (see opportunityBoundsFromLoss).
+  revenueAtRiskMin  Float?
+  revenueAtRiskMax  Float?
+  /// landing | interaction | conversion — dominant leak bucket from leak_by_metric.
+  dominantStage     String?
+  /// { speed, ux, seo, conversion } risk scores 0–100 at snapshot time.
+  monitoringScores  Json?
+
+  @@map("performance_snapshot")
+}
