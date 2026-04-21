@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { rateLimit } from "@/lib/rateLimit";
-import { getEnv } from "@/lib/env";
+import { getOpenAIClient } from "@/lib/openaiClient";
 import type { WhatThisMeansSignals } from "@/lib/whatThisMeansSignals";
 import { sanitizeWhatThisMeansText } from "@/lib/whatThisMeansSignals";
 import { buildWhatThisMeansFallback } from "@/lib/whatThisMeansFallback";
@@ -9,10 +8,6 @@ import { buildWhatThisMeansFallback } from "@/lib/whatThisMeansFallback";
 export const runtime = "nodejs";
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
-
-const openai = new OpenAI({
-  apiKey: getEnv("OPENAI_API_KEY"),
-});
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -66,7 +61,8 @@ export async function POST(request: NextRequest) {
 
   const { signals, phraseSeed } = parsed;
 
-  if (!getEnv("OPENAI_API_KEY")) {
+  const openai = getOpenAIClient();
+  if (!openai) {
     return NextResponse.json({ text: buildWhatThisMeansFallback(signals, phraseSeed) });
   }
 

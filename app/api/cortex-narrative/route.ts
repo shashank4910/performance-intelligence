@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import { getEnv } from "@/lib/env";
+import { getOpenAIClient } from "@/lib/openaiClient";
 import { getImpactNarrativeFallback, getImpactNarrativePrompt, type ImpactNarrativeInput } from "@/lib/impactEngine/cortexNarrative";
 
 export const runtime = "nodejs";
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
-
-const openai = new OpenAI({ apiKey: getEnv("OPENAI_API_KEY") });
 
 export async function POST(request: NextRequest) {
   let body: ImpactNarrativeInput;
@@ -23,7 +20,8 @@ export async function POST(request: NextRequest) {
 
   const fallback = getImpactNarrativeFallback(body);
 
-  if (!getEnv("OPENAI_API_KEY")) {
+  const openai = getOpenAIClient();
+  if (!openai) {
     return NextResponse.json({ narrative: fallback });
   }
 

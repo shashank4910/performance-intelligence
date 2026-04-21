@@ -22,7 +22,6 @@
 
 
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { getServerSession } from "next-auth";
 
 // Vercel: force the Node runtime (not Edge) so `pg`, `prisma`, and the full
@@ -67,10 +66,7 @@ import {
   generateExecutiveSummaryParagraph,
 } from "@/lib/executiveSummaryParagraphOpenAI";
 import { getEnv, warnIfMissingCoreEnv } from "@/lib/env";
-
-const openai = new OpenAI({
-  apiKey: getEnv("OPENAI_API_KEY"),
-});
+import { getOpenAIClient } from "@/lib/openaiClient";
 
 const IS_PROD = process.env.NODE_ENV === "production";
 
@@ -541,7 +537,8 @@ export async function GET(request: NextRequest) {
         let aiAnalysis = getCache(aiCacheKey) as AIMetricRow["aiAnalysis"] | undefined;
         const auditDesc = audit?.description ?? audit?.title ?? label;
         if (!aiAnalysis) {
-          if (getEnv("OPENAI_API_KEY")) {
+          const openai = getOpenAIClient();
+          if (openai) {
           try {
             const prompt = `You are a performance expert. For this Lighthouse metric that is failing or needs improvement:
 
@@ -889,11 +886,16 @@ Return ONLY valid JSON with no markdown or extra text:
     // whole /api/analyze response.
     let executiveSummaryParagraphResult: Awaited<ReturnType<typeof generateExecutiveSummaryParagraph>>;
     try {
-      executiveSummaryParagraphResult = await generateExecutiveSummaryParagraph(
-        openai,
-        founderExecInputs,
-        deterministicFallback
-      );
+      const openaiForExec = getOpenAIClient();
+      if (openaiForExec) {
+        executiveSummaryParagraphResult = await generateExecutiveSummaryParagraph(
+          openaiForExec,
+          founderExecInputs,
+          deterministicFallback
+        );
+      } else {
+        executiveSummaryParagraphResult = { summary: deterministicFallback };
+      }
     } catch (error) {
       console.error("[analyze] executive summary generation failed:", error);
       executiveSummaryParagraphResult = { summary: deterministicFallback };

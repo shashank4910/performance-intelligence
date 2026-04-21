@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 import { rateLimit } from "@/lib/rateLimit";
-import { getEnv } from "@/lib/env";
+import { getOpenAIClient } from "@/lib/openaiClient";
 import { computeAllScores, type LighthouseMetrics } from "@/lib/riskEngine";
 import { computeCompetitiveIntelligence, type CompetitiveMetrics } from "@/lib/competitiveIntelligence";
 import { industryBenchmarks, type IndustryKey } from "@/lib/industryBenchmarks";
@@ -10,10 +9,6 @@ import { getPageSpeedApiKey } from "@/lib/pageSpeedEnv";
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
-
-const openai = new OpenAI({
-  apiKey: getEnv("OPENAI_API_KEY"),
-});
 
 function getClientIp(request: NextRequest): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -87,7 +82,8 @@ function averageCompetitorMetrics(items: CompetitiveMetrics[]): CompetitiveMetri
 }
 
 async function aiIndustrySuggestion(userUrl: string): Promise<IndustryKey> {
-  if (!getEnv("OPENAI_API_KEY")) return "generic";
+  const openai = getOpenAIClient();
+  if (!openai) return "generic";
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -121,7 +117,8 @@ async function aiCompetitiveExplanation(input: {
   metricGaps: Array<{ metric: string; competitorGap: number | null; industryGap: number }>;
   percentileSegment: string;
 }): Promise<string> {
-  if (!getEnv("OPENAI_API_KEY")) {
+  const openai = getOpenAIClient();
+  if (!openai) {
     return "Your site can improve competitive positioning by closing the largest performance gaps, especially where loading and responsiveness trail industry targets.";
   }
   const prompt = `
