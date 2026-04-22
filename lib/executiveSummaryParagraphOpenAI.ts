@@ -1,6 +1,6 @@
 /**
  * Founder-facing executive summary: one continuous narrative from engine inputs only.
- * dominantStage / worstMetricGroup / contributingSignals + revenue exposure tone are not rendered alone.
+ * Narrative mode (POSITIVE / BALANCED / NEGATIVE) is decided by the system — not the LLM.
  */
 
 import OpenAI from "openai";
@@ -13,6 +13,11 @@ import { dominantStageFromImpacts } from "@/lib/systemDiagnosis";
 import { buildPrimaryConstraintPresentationInputFromAnalyzeData } from "@/lib/primaryConstraint";
 import { strongestConstraintAxis } from "@/lib/primaryConstraintPresentation";
 import { contributingSignalsFromFixPriorities } from "@/lib/aiExecutiveSummary";
+import {
+  validateNarrativeConsistency,
+  type ExecutiveNarrativeContext,
+  type NarrativeMode,
+} from "@/lib/executiveNarrativeContext";
 
 export type FounderExecutiveEngineInput = {
   dominant_stage: "load" | "interaction" | "conversion";
@@ -51,25 +56,25 @@ function mapConstraint(axis: "speed" | "interaction" | "stability"): string {
 
 function behaviorBreakpoint(stage: "load" | "interaction" | "conversion", constraint: string): string {
   if (stage === "load") {
-    return `users drop before engaging because ${constraint} breaks the first impression`;
+    return `visitors can disengage early when ${constraint} weakens the first impression`;
   }
   if (stage === "interaction") {
-    return `users drop during taps and scrolling because ${constraint} makes progress feel stalled`;
+    return `progress can stall when ${constraint} makes taps and scrolling feel heavy`;
   }
-  return `users drop near completion because ${constraint} weakens trust at decision time`;
+  return `decision-stage users can hesitate when ${constraint} weakens trust near completion`;
 }
 
 function businessImpactLine(stage: "load" | "interaction" | "conversion", severity: "low" | "medium" | "high"): string {
   const severityPrefix =
     severity === "high"
-      ? "This is a direct revenue leak"
+      ? "There is meaningful pressure on conversion while this bottleneck persists"
       : severity === "medium"
-        ? "This is suppressing conversion momentum"
-        : "This is limiting conversion efficiency";
+        ? "This is softening conversion momentum"
+        : "This is gently capping conversion efficiency";
 
-  if (stage === "load") return `${severityPrefix} because visitors leave before meaningful engagement starts`;
-  if (stage === "interaction") return `${severityPrefix} because active sessions fail to progress toward key actions`;
-  return `${severityPrefix} because decision-stage users hesitate and abandon before conversion`;
+  if (stage === "load") return `${severityPrefix} because early engagement does not get a strong runway`;
+  if (stage === "interaction") return `${severityPrefix} because mid-journey flow does not feel effortless`;
+  return `${severityPrefix} because completion steps do not feel fully trustworthy`;
 }
 
 function rankedPriorityOrder(weights: ReturnType<typeof computeStageMetricWeights>): Array<"load" | "interaction" | "conversion"> {
@@ -92,6 +97,7 @@ function confidenceFromSignals(
   return "medium";
 }
 
+/** Legacy structured engine input (kept for callers); prefer `buildExecutiveNarrativeContext` for new work. */
 export function buildFounderExecutiveInputsFromAnalyzeData(
   data: AnalyzeLikeForFounderExec,
   riskLevel: "Low" | "Medium" | "High"
@@ -123,45 +129,63 @@ export function buildFounderExecutiveInputsFromAnalyzeData(
   };
 }
 
-/** Avoid multi-line template literals in this file (Turbopack/SWC parse quirks with long prompts). */
-const SYSTEM = [
-  "You are a CTO-level performance advisor.",
-  "",
-  "Your job is to explain what is happening on the website in clear, simple English.",
-  "",
-  "You must:",
-  "- Speak like a human, not an AI",
-  "- Be direct and specific",
-  "- Avoid vague or generic phrases",
-  "- Focus on user behavior and business impact",
-  "- Clearly state where users are dropping",
-  "- Clearly state why",
-  "- Clearly state what to fix first",
-  "",
-  "Write ONE continuous paragraph (NOT multiple paragraphs).",
-  "",
-  "Length: 180–260 words.",
-  "",
-  "Do NOT use:",
-  "- 'the data suggests'",
-  "- 'based on'",
-  "- 'analysis shows'",
-  "- 'in conclusion'",
-  "- any filler language",
-  "",
-  "Do NOT repeat sentences.",
-  "",
-  "Make it feel like a real expert explaining the problem.",
-].join("\n");
+function buildStructuredSystemPrompt(mode: NarrativeMode): string {
+  const modeBlock =
+    mode === "POSITIVE"
+      ? "MODE IS POSITIVE: emphasize stability and a smooth experience. Frame issues as minor. Do NOT use: serious, critical, leak, alarming, urgent crisis, users are dropping."
+      : mode === "BALANCED"
+        ? "MODE IS BALANCED: show both strengths and weaknesses. Avoid extreme language. Do not use the phrase serious revenue leak."
+        : "MODE IS NEGATIVE: be direct about business risk and what to fix; urgency is appropriate.";
 
-function userMessage(engine: FounderExecutiveEngineInput): string {
-  const payload = JSON.stringify(engine, null, 2);
+  return [
+    "You are a CTO-level advisor explaining website performance to a founder.",
+    "",
+    "Write a clear, simple executive summary as ONE continuous piece of prose (natural paragraph flow, not fragmented lines).",
+    "",
+    modeBlock,
+    "",
+    "STRICT RULES:",
+    "- Plain English only (no jargon acronyms, no lab metric names).",
+    "- No AI tone or generic filler.",
+    "- No exaggeration beyond what the MODE allows.",
+    "- No digits or percentages.",
+    "- Do not write: analysis shows, based on data, in conclusion, the data suggests, based on, leverage, optimize performance.",
+    "",
+    "STRUCTURE (one flowing narrative — five beats in order, without headings):",
+    "Beat — overall state aligned with MODE.",
+    "Beat — what is working well (when strengths exist; for POSITIVE mode this must feel genuine).",
+    "Beat — where users may feel friction.",
+    "Beat — business impact on engagement and conversion.",
+    "Beat — what to prioritize next (omit only when MODE is POSITIVE and the situation is clearly low-urgency).",
+    "",
+    "LENGTH: 180–220 words.",
+    "",
+    "Do NOT repeat sentences.",
+  ].join("\n");
+}
+
+function userMessageForContext(ctx: ExecutiveNarrativeContext): string {
+  const slim = {
+    mode: ctx.mode,
+    tone: ctx.narrative_rules.tone,
+    allow_urgency: ctx.narrative_rules.allow_urgency,
+    allow_revenue_leak_language: ctx.narrative_rules.allow_revenue_leak_language,
+    focus: [...ctx.narrative_rules.focus],
+    overall_health_score: ctx.overall_health_score,
+    revenue_exposure_level: ctx.revenue_exposure_level,
+    dominant_stage: ctx.dominant_stage,
+    worst_metric_group: ctx.worst_metric_group,
+    contributing_signals: ctx.contributing_signals,
+    strengths: ctx.strengths,
+    weaknesses: ctx.weaknesses,
+    business_impact_level: ctx.business_impact_level,
+  };
   return (
-    "CONTEXT (meaning only — do not echo keys or JSON to the reader):\n" +
-    payload +
-    "\n\n" +
-    "stage meanings: load = before users settle into the page, interaction = during taps and scrolling, conversion = when they try to complete value actions.\n" +
-    "Write the narrative now."
+    "STRUCTURED WRITING TASK — write the founder-facing executive summary from this ENGINE CONTEXT only.\n" +
+    "Do not invent a new diagnosis; stay inside these signals.\n" +
+    "Do not restate metric names, numbers, or percentages.\n\n" +
+    JSON.stringify(slim, null, 2) +
+    "\n\nWrite the narrative now."
   );
 }
 
@@ -183,8 +207,7 @@ function sanitizeEncoding(text: string): string {
   return text
     .replace(/[“”]/g, '"')
     .replace(/[‘’]/g, "'")
-    .replace(/�\?\?/g, "'")
-    .replace(/�/g, "")
+    .replace(/\uFFFD/g, "")
     .replace(/[^\x09\x0A\x0D\x20-\x7E\u00A0-\uFFFF]/g, "")
     .trim();
 }
@@ -197,9 +220,15 @@ function normalizeNarrativeWhitespace(text: string): string {
     .trim();
 }
 
-const MIN_ACCEPTABLE_WORDS = 150;
-const MAX_ACCEPTABLE_WORDS = 260;
-const BANNED_PHRASES = ["the data suggests", "based on", "analysis shows", "in conclusion"];
+const MIN_ACCEPTABLE_WORDS = 180;
+const MAX_ACCEPTABLE_WORDS = 220;
+const BANNED_PHRASES = [
+  "the data suggests",
+  "based on",
+  "analysis shows",
+  "in conclusion",
+  "based on data",
+];
 
 function normalizeSentenceSignature(text: string): string {
   return text
@@ -228,24 +257,6 @@ function hasBannedPhrase(text: string): boolean {
   return BANNED_PHRASES.some((p) => t.includes(p));
 }
 
-function hasStageMention(text: string): boolean {
-  return /\b(load|interaction|conversion)\b/i.test(text);
-}
-
-function hasConstraintMention(text: string, engine: FounderExecutiveEngineInput): boolean {
-  const t = text.toLowerCase();
-  const phrases = [engine.primary_constraint.toLowerCase(), "responsiveness", "stability", "load"];
-  return phrases.some((p) => t.includes(p));
-}
-
-function hasActionDirective(text: string): boolean {
-  return /\b(focus on|start by|prioritize|fix first|address)\b/i.test(text);
-}
-
-function hasRequiredStructure(text: string, engine: FounderExecutiveEngineInput): boolean {
-  return hasStageMention(text) && hasConstraintMention(text, engine) && hasActionDirective(text);
-}
-
 function isAcceptableNarrative(text: string): boolean {
   const t = text.trim();
   if (!t) return false;
@@ -256,40 +267,64 @@ function isAcceptableNarrative(text: string): boolean {
   return true;
 }
 
-function stageDisplay(stage: "load" | "interaction" | "conversion"): string {
-  if (stage === "load") return "load";
-  if (stage === "interaction") return "interaction";
-  return "conversion";
+function stagePlain(ctx: ExecutiveNarrativeContext): string {
+  if (ctx.dominant_stage === "load") return "when people first land";
+  if (ctx.dominant_stage === "interaction") return "during active use";
+  return "near completion";
 }
 
-function buildDeterministicFallbackParagraph(engine: FounderExecutiveEngineInput, deterministicFallback: string): string {
-  const stage = stageDisplay(engine.dominant_stage);
-  const topFactor = engine.contributing_factors[0] ?? "the highest-friction journey points";
-  const orderedStages = engine.priority_order.map(stageDisplay).join(" then ");
-  const genericAction =
-    engine.primary_constraint === "interaction responsiveness"
-      ? "start by reducing interaction lag on taps and scrolls"
-      : engine.primary_constraint === "first-load readiness"
-        ? "start by improving first-load readiness on entry pages"
-        : "start by stabilizing key screens during decision flows";
+function constraintPlain(ctx: ExecutiveNarrativeContext): string {
+  if (ctx.worst_metric_group === "speed") return "first-load readiness";
+  if (ctx.worst_metric_group === "interaction") return "interaction responsiveness";
+  return "visual and behavioral stability";
+}
 
-  const fallback = [
-    `Users are dropping during the ${stage} stage because ${engine.primary_constraint} is the main constraint in the journey.`,
-    `${engine.user_behavior_breakpoint.charAt(0).toUpperCase()}${engine.user_behavior_breakpoint.slice(1)}, and ${engine.business_impact.toLowerCase()}.`,
-    `The strongest contributing factor right now is ${topFactor}, and the practical priority order is ${orderedStages}.`,
-    `Focus on this sequence first and ${genericAction} so users can move forward with confidence.`,
+function buildDeterministicFallbackFromContext(
+  ctx: ExecutiveNarrativeContext,
+  deterministicFallback: string
+): string {
+  const det = sanitizePlaintextParagraphs(deterministicFallback);
+  const stage = stagePlain(ctx);
+  const constraint = constraintPlain(ctx);
+  const s0 = ctx.strengths[0] ?? "the baseline experience looks steady for most visits";
+  const w0 = ctx.weaknesses[0] ?? "a few polish opportunities still deserve attention";
+
+  if (ctx.mode === "POSITIVE") {
+    const body = [
+      `Overall the experience sits in a reassuring band: most visitors should see a calm journey with room to refine details, especially ${stage}.`,
+      `What is working well: ${s0}`,
+      `Where friction can still appear: ${w0} — treat it as incremental tuning rather than a crisis.`,
+      `Business impact should stay contained while you keep improvements small and focused on ${constraint}.`,
+    ].join(" ");
+    const merged = det.length > 40 ? `${body} ${det}` : body;
+    return normalizeNarrativeWhitespace(sanitizeEncoding(merged));
+  }
+
+  if (ctx.mode === "BALANCED") {
+    const body = [
+      `The picture is mixed: there are real strengths alongside friction that still shapes outcomes, especially ${stage}.`,
+      `Strengths include ${s0}`,
+      `Friction shows up around ${w0}`,
+      `For the business, this reads as uneven momentum until the sharpest issues around ${constraint} are reduced.`,
+      `Prioritize the next fixes that tighten the journey without overreacting.`,
+    ].join(" ");
+    const merged = det.length > 40 ? `${body} ${det}` : body;
+    return normalizeNarrativeWhitespace(sanitizeEncoding(merged));
+  }
+
+  const body = [
+    `The journey carries clear business risk ${stage}, and ${constraint} is the main constraint users feel.`,
+    `Contributing pressure includes ${ctx.contributing_signals[0] ?? "multiple friction points"}.`,
+    `Strengths are limited right now; ${s0} is not enough to offset ${w0}.`,
+    `Business impact is material until the bottleneck is addressed.`,
+    `Start by fixing the highest-friction steps so completion feels trustworthy again.`,
   ].join(" ");
 
-  const deterministicHint = sanitizePlaintextParagraphs(deterministicFallback);
-  const merged =
-    deterministicHint.length > 0
-      ? `${fallback} ${deterministicHint}`
-      : fallback;
+  const merged = det.length > 40 ? `${body} ${det}` : body;
   return normalizeNarrativeWhitespace(sanitizeEncoding(merged));
 }
 
 export type ExecutiveSummaryParagraphDebug = {
-  /** Verbatim `message.content` from the chat completion (before post-processing). */
   RAW_AI_SUMMARY: string | null;
   FINAL_SUMMARY: string;
   usedFallback: boolean;
@@ -322,16 +357,25 @@ function withParagraphDebug(
   };
 }
 
+function postProcess(raw: string): string {
+  const cleaned = raw
+    .replace(new RegExp("^```[\\s\\S]*?```$", "m"), "")
+    .replace(/^markdown\n/i, "")
+    .trim();
+  const utf8Clean = sanitizeEncoding(cleaned);
+  return normalizeNarrativeWhitespace(utf8Clean);
+}
+
 /**
- * Single narrative for the dashboard. One model call; minimal gate (non-empty, enough words) or deterministic fallback.
- * When `EXEC_SUMMARY_DEBUG=1`, also returns `debug` with RAW vs FINAL (see types).
+ * Single narrative for the dashboard. Mode and facts come from `ExecutiveNarrativeContext`; the LLM only writes prose.
  */
 export async function generateExecutiveSummaryParagraph(
   client: OpenAI,
-  engine: FounderExecutiveEngineInput,
+  context: ExecutiveNarrativeContext,
   deterministicFallback: string
 ): Promise<GenerateExecutiveSummaryParagraphResult> {
-  const fallback = buildDeterministicFallbackParagraph(engine, deterministicFallback);
+  const fallback = buildDeterministicFallbackFromContext(context, deterministicFallback);
+  const system = buildStructuredSystemPrompt(context.mode);
 
   if (!getEnv("OPENAI_API_KEY")) {
     return withParagraphDebug(fallback, null, true);
@@ -341,57 +385,57 @@ export async function generateExecutiveSummaryParagraph(
     const requestNarrative = async (extraInstruction?: string): Promise<string | null> => {
       const completion = await client.chat.completions.create({
         model: "gpt-4o-mini",
-        temperature: 0.38,
-        max_tokens: 560,
+        temperature: 0.32,
+        max_tokens: 520,
         messages: [
-          { role: "system", content: SYSTEM },
+          { role: "system", content: system },
           {
             role: "user",
             content: extraInstruction
-              ? `${userMessage(engine)}\n\n${extraInstruction}`
-              : userMessage(engine),
+              ? `${userMessageForContext(context)}\n\n${extraInstruction}`
+              : userMessageForContext(context),
           },
         ],
       });
       return completion.choices[0]?.message?.content ?? null;
     };
 
-    const rawAiVerbatim = await requestNarrative();
-    const raw = rawAiVerbatim?.trim();
-    if (!raw) return withParagraphDebug(fallback, rawAiVerbatim, true);
+    const processAttempt = (rawAiVerbatim: string | null) => {
+      const raw = rawAiVerbatim?.trim();
+      if (!raw) return { text: null as string | null, rawAiVerbatim, wordsOk: false, consistency: { ok: true } as const };
+      const normalized = postProcess(raw);
+      const wordsOk = isAcceptableNarrative(normalized);
+      const consistency = validateNarrativeConsistency(normalized, context);
+      const ok = wordsOk && consistency.ok;
+      return { text: ok ? normalized : null, rawAiVerbatim, wordsOk, consistency };
+    };
 
-    const cleaned = raw
-      .replace(new RegExp("^```[\\s\\S]*?```$", "m"), "")
-      .replace(/^markdown\n/i, "")
-      .trim();
-    const utf8Clean = sanitizeEncoding(cleaned);
-    const normalized = normalizeNarrativeWhitespace(utf8Clean);
-    const firstPassAcceptable =
-      isAcceptableNarrative(normalized) && hasRequiredStructure(normalized, engine);
-
-    if (firstPassAcceptable) {
-      return withParagraphDebug(normalized, rawAiVerbatim, false);
+    const firstRaw = await requestNarrative();
+    const first = processAttempt(firstRaw);
+    if (first.text) {
+      return withParagraphDebug(first.text, firstRaw, false);
     }
 
+    const hints: string[] = [];
+    if (!first.text && firstRaw) {
+      if (!first.wordsOk) {
+        hints.push(`Rewrite: length must be ${MIN_ACCEPTABLE_WORDS}–${MAX_ACCEPTABLE_WORDS} words, one continuous narrative.`);
+      }
+      if (first.consistency.ok === false) {
+        hints.push(`Narrative consistency failed (${first.consistency.reason}). Follow MODE rules strictly.`);
+      }
+    }
     const retryRaw = await requestNarrative(
-      "Retry once. Ensure you explicitly mention load, interaction, or conversion stage, include the core constraint, and include a direct action lead-in such as 'focus on' or 'start by'."
+      hints.length > 0
+        ? hints.join(" ")
+        : "Rewrite once: meet word count, MODE rules, and banned-phrase rules."
     );
-    const retryTrimmed = retryRaw?.trim();
-    if (!retryTrimmed) return withParagraphDebug(fallback, rawAiVerbatim, true);
-
-    const retryCleaned = retryTrimmed
-      .replace(new RegExp("^```[\\s\\S]*?```$", "m"), "")
-      .replace(/^markdown\n/i, "")
-      .trim();
-    const retryNormalized = normalizeNarrativeWhitespace(sanitizeEncoding(retryCleaned));
-    const retryAcceptable =
-      isAcceptableNarrative(retryNormalized) && hasRequiredStructure(retryNormalized, engine);
-
-    if (retryAcceptable) {
-      return withParagraphDebug(retryNormalized, retryRaw, false);
+    const second = processAttempt(retryRaw);
+    if (second.text) {
+      return withParagraphDebug(second.text, retryRaw, false);
     }
 
-    return withParagraphDebug(fallback, retryRaw ?? rawAiVerbatim, true);
+    return withParagraphDebug(fallback, retryRaw ?? firstRaw, true);
   } catch (e) {
     console.error("[executive-summary-paragraph]", e);
     return withParagraphDebug(fallback, null, true);

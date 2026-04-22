@@ -257,9 +257,9 @@ export default function ReportPage() {
             </div>
           )}
           {summary?.executive_summary_paragraph || summary?.executive_summary ? (
-            <div className="mt-6 ui-panel p-6">
+            <div className="mt-6 w-full ui-panel p-6">
               <h3 className="mb-3 text-sm font-semibold text-[var(--foreground)]">Executive summary</h3>
-              <p className="text-sm text-[var(--muted)] leading-relaxed">
+              <p className="w-full text-sm text-[var(--muted)] leading-relaxed">
                 {summary.executive_summary_paragraph ?? summary.executive_summary}
               </p>
             </div>

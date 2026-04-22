@@ -377,7 +377,7 @@ export default function DashboardProjectPage() {
               }}
               className="mt-10 w-full scroll-mt-28 rounded-xl border border-white/[0.045] bg-[#070c18]/35 py-7 sm:mt-11 sm:py-9"
             >
-              <div className="mx-auto w-full max-w-[min(88ch,92rem,calc(100vw-2rem))] px-3 sm:px-5 lg:px-6">
+              <div className="mx-auto w-full max-w-[min(92rem,calc(100vw-2rem))] px-3 sm:px-5 lg:px-6">
                 <p className="text-center text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-500 sm:text-left">
                   Executive summary
                 </p>

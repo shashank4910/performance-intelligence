@@ -9,6 +9,11 @@ import { dominantStageFromImpacts } from "@/lib/systemDiagnosis";
 import { buildPrimaryConstraintPresentationInputFromAnalyzeData } from "@/lib/primaryConstraint";
 import { strongestConstraintAxis } from "@/lib/primaryConstraintPresentation";
 import { dominantStageFromLeakByMetric } from "@/lib/revenueStabilityMonitoring";
+import {
+  getPerformanceNarrativeMode,
+  mapRevenueRiskScoreToExposureLevel,
+  type NarrativeMode,
+} from "@/lib/executiveNarrativeContext";
 
 export type DominantStageKind = "landing" | "interaction" | "conversion";
 export type WorstMetricGroupKind = "speed" | "interaction" | "stability";
@@ -247,7 +252,60 @@ function severityTone(sev: OverallSeverityKind): "soft" | "firm" | "sharp" {
   return "sharp";
 }
 
-function buildHeadline(input: ExecutiveSummaryInput, parts: string[]): string {
+function dominantStageForNarrativeMode(d: DominantStageKind): "load" | "interaction" | "conversion" {
+  if (d === "landing") return "load";
+  return d;
+}
+
+function resolveNarrativeMode(
+  built: ExecutiveSummaryInput,
+  options?: { overallHealth100?: number; revenueRiskScore?: number }
+): NarrativeMode {
+  const health10 =
+    options?.overallHealth100 != null
+      ? Math.min(10, Math.max(0, options.overallHealth100 / 10))
+      : built.overallSeverity === "low"
+        ? 8
+        : built.overallSeverity === "medium"
+          ? 6
+          : 4;
+  const exposure =
+    options?.revenueRiskScore != null
+      ? mapRevenueRiskScoreToExposureLevel(options.revenueRiskScore)
+      : built.overallSeverity === "high"
+        ? "HIGH"
+        : built.overallSeverity === "medium"
+          ? "MEDIUM"
+          : "LOW";
+  return getPerformanceNarrativeMode({
+    overall_health_score: health10,
+    revenue_exposure_level: exposure,
+    dominant_stage: dominantStageForNarrativeMode(built.dominantStage),
+    worst_metric_group: built.worstMetricGroup,
+  }).narrative_mode;
+}
+
+function buildHeadline(input: ExecutiveSummaryInput, parts: string[], mode: NarrativeMode): string {
+  if (mode === "POSITIVE") {
+    return hashPick(parts, 0, [
+      "Most visits feel smooth enough that people can browse without fighting the page.",
+      "Overall, the product experience feels steady, and users can progress without sharp surprises.",
+      "For most visitors, pages feel responsive and calm enough to trust routine journeys.",
+    ]);
+  }
+  if (mode === "BALANCED") {
+    const sigs = input.contributingSignals;
+    const base = hashPick(parts, 0, [
+      "The experience is mixed: some pieces feel strong while others add friction worth attention.",
+      "Results are split: foundational areas look fine, but a few repeat frustrations still show up.",
+      "You have real strengths on display, with a narrower set of friction points still shaping outcomes.",
+    ]);
+    if (sigs.length === 0) return base;
+    return `${base} ${hashPick(parts, 3, [`One clear theme is ${sigs[0]}.`, `A steady signal is ${sigs[0]}.`, `${sigs[0]}.`])}`.replace(
+      /\s+/g,
+      " "
+    ).trim();
+  }
   const drop = dropLine(input.dominantStage, parts);
   const cause = causeFragment(input.worstMetricGroup, parts);
   const hb = `${drop} ${hashPick(parts, 2, ["That ties to", "That lines up with", "That tracks with"])} ${cause}.`;
@@ -261,8 +319,30 @@ function buildHeadline(input: ExecutiveSummaryInput, parts: string[]): string {
   return `${hb} ${extra}`.replace(/\s+/g, " ").trim();
 }
 
-function buildImpact(input: ExecutiveSummaryInput, parts: string[]): string {
+function buildImpact(input: ExecutiveSummaryInput, parts: string[], mode: NarrativeMode): string {
   const tone = severityTone(input.overallSeverity);
+  if (mode === "POSITIVE") {
+    return hashPick(parts, 4, [
+      "Business impact should stay modest while you keep small frictions from compounding.",
+      "Outcomes look stable enough that this is about refinement, not rescue.",
+      "Conversion and engagement should hold steady if you chip away at the few rough edges that remain.",
+    ]);
+  }
+  if (mode === "BALANCED") {
+    if (tone === "soft") {
+      return hashPick(parts, 4, [
+        "Friction is trimming outcomes in a way that shows up quietly in weekly numbers.",
+        "This is subtle on the surface, but it can quietly cap results.",
+        "Even small drag here shows up in the business outcome over time.",
+      ]);
+    }
+    return hashPick(parts, 4, [
+      "This is trimming revenue in a way owners feel on weekly numbers.",
+      "The business leaves real dollars on the table while the main bottleneck stays open.",
+      "Momentum is softer than it should be until the sharpest friction is reduced.",
+    ]);
+  }
+  // NEGATIVE narrative mode — direct impact language allowed
   if (tone === "soft") {
     return hashPick(parts, 4, [
       "Revenue is not a side issue here; friction is quietly trimming outcomes.",
@@ -358,7 +438,12 @@ function buildAction(input: ExecutiveSummaryInput, parts: string[]): string {
  */
 export function generateExecutiveSummaryJson(
   data: AnalyzeLikePayload,
-  options?: { baselineRevenue?: number; sensitivityMode?: SensitivityMode }
+  options?: {
+    baselineRevenue?: number;
+    sensitivityMode?: SensitivityMode;
+    overallHealth100?: number;
+    revenueRiskScore?: number;
+  }
 ): ExecutiveSummaryResult {
   const built = buildExecutiveSummaryInputFromAnalyzeData(data, options);
 
@@ -369,6 +454,8 @@ export function generateExecutiveSummaryJson(
     return { ok: false, error: "Executive summary mismatch with system state" };
   }
 
+  const narrativeMode = resolveNarrativeMode(built, options);
+
   const parts = [
     built.dominantStage,
     built.worstMetricGroup,
@@ -377,8 +464,8 @@ export function generateExecutiveSummaryJson(
   ];
 
   let json: ExecutiveSummaryJson = {
-    headline: buildHeadline(built, parts),
-    impact: buildImpact(built, parts),
+    headline: buildHeadline(built, parts, narrativeMode),
+    impact: buildImpact(built, parts, narrativeMode),
     constraint: buildConstraint(built, parts),
     action: buildAction(built, parts),
   };
