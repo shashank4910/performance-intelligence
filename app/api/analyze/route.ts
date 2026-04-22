@@ -62,10 +62,8 @@ import { getPageSpeedApiKey } from "@/lib/pageSpeedEnv";
 import { opportunityBoundsFromLoss, type SensitivityMode } from "@/lib/revenueImpactSensitivityMath";
 import { dominantStageFromLeakByMetric } from "@/lib/revenueStabilityMonitoring";
 import { generateExecutiveSummaryJson, type ExecutiveSummaryJson } from "@/lib/aiExecutiveSummary";
-import {
-  buildFounderExecutiveInputsFromAnalyzeData,
-  generateExecutiveSummaryParagraph,
-} from "@/lib/executiveSummaryParagraphOpenAI";
+import { generateExecutiveSummaryParagraph } from "@/lib/executiveSummaryParagraphOpenAI";
+import { buildExecutiveNarrativeContext } from "@/lib/executiveNarrativeContext";
 import { getEnv, warnIfMissingCoreEnv } from "@/lib/env";
 import { getOpenAIClient } from "@/lib/openaiClient";
 
@@ -335,11 +333,35 @@ export async function GET(request: NextRequest) {
     // 1️⃣ PageSpeed mobile + desktop: start both immediately so desktop time
     // overlaps mobile fetch + metric/OpenAI work (sequential PSI was a common
     // 504 / FUNCTION_INVOCATION_TIMEOUT on Vercel).
+    //
+    // Hard timeouts:
+    //   - Mobile:  45s. If Google takes longer than this we return 504 — the
+    //              full handler budget is 60s on Vercel and we still need
+    //              ~5–10s for metric AI + executive summary + DB writes.
+    //   - Desktop: 30s. It's purely enrichment (deviceImpact). Aborting it
+    //              early just falls through to the `catch` below and the
+    //              response ships without desktop numbers.
     const psiBase = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
     const mobilePsiUrl = `${psiBase}?url=${encodeURIComponent(url)}&strategy=mobile&key=${pageSpeedKey}`;
     const desktopPsiUrl = `${psiBase}?url=${encodeURIComponent(url)}&strategy=desktop&key=${pageSpeedKey}`;
-    const desktopPsiPromise = fetch(desktopPsiUrl);
-    const pageSpeedRes = await fetch(mobilePsiUrl);
+    const desktopPsiPromise = fetch(desktopPsiUrl, { signal: AbortSignal.timeout(30_000) });
+    let pageSpeedRes: Response;
+    try {
+      pageSpeedRes = await fetch(mobilePsiUrl, { signal: AbortSignal.timeout(45_000) });
+    } catch (err) {
+      const isTimeout =
+        (err as { name?: string })?.name === "TimeoutError" ||
+        (err as { name?: string })?.name === "AbortError";
+      console.error("[analyze] PageSpeed mobile fetch failed:", err);
+      return NextResponse.json(
+        {
+          error: isTimeout
+            ? "PageSpeed took longer than 45 seconds to respond. Retry once — Google occasionally queues very heavy sites."
+            : "PageSpeed fetch failed. Check the URL or try again.",
+        },
+        { status: isTimeout ? 504 : 502 }
+      );
+    }
 
     const pageSpeedRaw = await pageSpeedRes.text();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Lighthouse JSON is deeply nested and variable
@@ -862,7 +884,12 @@ Return ONLY valid JSON with no markdown or extra text:
         fix_priorities: priorities,
         baselineRevenueForCompetitorAnalysis: baselineRevenue,
       },
-      { baselineRevenue, sensitivityMode: sensitivityModeForSummary }
+      {
+        baselineRevenue,
+        sensitivityMode: sensitivityModeForSummary,
+        overallHealth100: overallHealth,
+        revenueRiskScore,
+      }
     );
     if (execResult.ok) {
       executiveSummaryJson = execResult.json;
@@ -873,15 +900,20 @@ Return ONLY valid JSON with no markdown or extra text:
       console.error("Executive summary:", execResult.error);
     }
 
-    const founderExecInputs = buildFounderExecutiveInputsFromAnalyzeData(
-      {
+    const executiveNarrativeContext = buildExecutiveNarrativeContext({
+      overallHealth100: overallHealth,
+      revenueRiskScore,
+      data: {
         estimatedMonthlyLeak,
+        leak_by_metric,
         revenueImpactInputs,
         detailed_metrics: detailedMetrics,
         fix_priorities: priorities,
+        baselineRevenueForCompetitorAnalysis: baselineRevenue,
       },
-      overallLevel
-    );
+      metricsForDashboard: metrics_for_dashboard,
+      businessImpactLevel: businessImpact?.impact_level ?? null,
+    });
     const deterministicFallback = execResult.ok
       ? [execResult.json.headline, execResult.json.impact, execResult.json.constraint, execResult.json.action].join("\n\n")
       : fallbackSummary;
@@ -895,7 +927,7 @@ Return ONLY valid JSON with no markdown or extra text:
       if (openaiForExec) {
         executiveSummaryParagraphResult = await generateExecutiveSummaryParagraph(
           openaiForExec,
-          founderExecInputs,
+          executiveNarrativeContext,
           deterministicFallback
         );
       } else {
