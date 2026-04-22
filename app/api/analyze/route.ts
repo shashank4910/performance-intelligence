@@ -25,10 +25,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { safeGetServerSession } from "@/lib/safeSession";
 
 // Vercel: force the Node runtime (not Edge) so `pg`, `prisma`, and the full
-// `openai` SDK work. `maxDuration` is the ceiling Vercel allows this route to
-// run — PageSpeed + OpenAI chains routinely need 30–50s.
+// `openai` SDK work. `maxDuration` is the ceiling for this route (Pro: up to
+// 300s; Hobby is capped at 60s by the platform). Two PSI runs + OpenAI can
+// exceed 60s wall-clock if desktop waits after mobile.
 export const runtime = "nodejs";
-export const maxDuration = 60;
+export const maxDuration = 300;
 export const dynamic = "force-dynamic";
 import { getCache, setCache, deleteCache } from "@/lib/cache";
 import { rateLimit } from "@/lib/rateLimit";
@@ -331,12 +332,14 @@ export async function GET(request: NextRequest) {
 
     deleteCache(cacheKey);
     setLastScannedUrl(url);
-    // 1️⃣ Call PageSpeed API
-    const pageSpeedRes = await fetch(
-      `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
-        url
-      )}&strategy=mobile&key=${pageSpeedKey}`
-    );
+    // 1️⃣ PageSpeed mobile + desktop: start both immediately so desktop time
+    // overlaps mobile fetch + metric/OpenAI work (sequential PSI was a common
+    // 504 / FUNCTION_INVOCATION_TIMEOUT on Vercel).
+    const psiBase = "https://www.googleapis.com/pagespeedonline/v5/runPagespeed";
+    const mobilePsiUrl = `${psiBase}?url=${encodeURIComponent(url)}&strategy=mobile&key=${pageSpeedKey}`;
+    const desktopPsiUrl = `${psiBase}?url=${encodeURIComponent(url)}&strategy=desktop&key=${pageSpeedKey}`;
+    const desktopPsiPromise = fetch(desktopPsiUrl);
+    const pageSpeedRes = await fetch(mobilePsiUrl);
 
     const pageSpeedRaw = await pageSpeedRes.text();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Lighthouse JSON is deeply nested and variable
@@ -511,16 +514,20 @@ export async function GET(request: NextRequest) {
       return [];
     }
 
-    const metrics_for_dashboard: AIMetricRow[] = [];
-
-    for (const { section, key, id } of SECTION_METRICS) {
+    // Parallelize per-metric AI calls. The loop was previously sequential,
+    // adding up to 15 × ~1.5s = ~22s of wall-clock latency on cache-cold runs.
+    // Running them concurrently cuts that to ~1–3s; OpenAI easily handles the
+    // burst at this size. Order is preserved because `Promise.all` preserves
+    // input order.
+    const openaiForMetrics = getOpenAIClient();
+    const metricRowPromises = SECTION_METRICS.map(async ({ section, key, id }): Promise<AIMetricRow | null> => {
       const sectionData = detailedMetrics[section as keyof typeof detailedMetrics] as Record<string, unknown> | undefined;
       const audit = sectionData?.[key] as { numericValue?: number; score?: number | null; title?: string; description?: string } | undefined;
-      if (!audit) continue;
+      if (!audit) return null;
       const numericValue = audit.numericValue;
-      if (numericValue == null || numericValue === undefined) continue;
+      if (numericValue == null || numericValue === undefined) return null;
       const displayValue = formatMetricValue(id, numericValue);
-      if (displayValue == null) continue;
+      if (displayValue == null) return null;
       const score = audit.score;
       const verdict: AIMetricRow["verdict"] =
         score != null && score >= 0.9 ? "Good" : score != null && score >= 0.5 ? "Needs Improvement" : "Poor";
@@ -528,7 +535,6 @@ export async function GET(request: NextRequest) {
       const label = METRIC_LABELS[id] ?? id;
       const row: AIMetricRow = { metricKey, label, displayValue, verdict };
 
-      // Extract offending resources from primary or fallback audits (so LCP/FCP get resources)
       const resources = getResourcesForMetric(id, audits);
       if (resources.length > 0) row.resources = resources;
 
@@ -537,10 +543,9 @@ export async function GET(request: NextRequest) {
         let aiAnalysis = getCache(aiCacheKey) as AIMetricRow["aiAnalysis"] | undefined;
         const auditDesc = audit?.description ?? audit?.title ?? label;
         if (!aiAnalysis) {
-          const openai = getOpenAIClient();
-          if (openai) {
-          try {
-            const prompt = `You are a performance expert. For this Lighthouse metric that is failing or needs improvement:
+          if (openaiForMetrics) {
+            try {
+              const prompt = `You are a performance expert. For this Lighthouse metric that is failing or needs improvement:
 
 Metric: ${label}
 Value: ${displayValue}
@@ -548,33 +553,33 @@ Lighthouse context: ${auditDesc}
 
 Return ONLY valid JSON with no markdown or extra text:
 { "rootCause": "one short paragraph", "fixes": ["fix1", "fix2", "fix3"], "impact": "Low|Medium|High", "difficulty": "Low|Medium|High" }`;
-            const completion = await openai.chat.completions.create({
-              model: "gpt-4o-mini",
-              temperature: 0.2,
-              messages: [
-                { role: "system", content: "Return only valid JSON." },
-                { role: "user", content: prompt },
-              ],
-            });
-            const content = completion.choices[0].message?.content;
-            if (content) {
-              const parsed = JSON.parse(content);
+              const completion = await openaiForMetrics.chat.completions.create({
+                model: "gpt-4o-mini",
+                temperature: 0.2,
+                messages: [
+                  { role: "system", content: "Return only valid JSON." },
+                  { role: "user", content: prompt },
+                ],
+              });
+              const content = completion.choices[0].message?.content;
+              if (content) {
+                const parsed = JSON.parse(content);
+                aiAnalysis = {
+                  rootCause: String(parsed.rootCause ?? ""),
+                  fixes: Array.isArray(parsed.fixes) ? parsed.fixes.map(String) : [],
+                  impact: String(parsed.impact ?? ""),
+                  difficulty: String(parsed.difficulty ?? ""),
+                };
+                setCache(aiCacheKey, aiAnalysis, 60 * 60 * 1000);
+              }
+            } catch {
               aiAnalysis = {
-                rootCause: String(parsed.rootCause ?? ""),
-                fixes: Array.isArray(parsed.fixes) ? parsed.fixes.map(String) : [],
-                impact: String(parsed.impact ?? ""),
-                difficulty: String(parsed.difficulty ?? ""),
+                rootCause: auditDesc ?? "Analysis unavailable.",
+                fixes: [],
+                impact: "",
+                difficulty: "",
               };
-              setCache(aiCacheKey, aiAnalysis, 60 * 60 * 1000);
             }
-          } catch {
-            aiAnalysis = {
-              rootCause: auditDesc ?? "Analysis unavailable.",
-              fixes: [],
-              impact: "",
-              difficulty: "",
-            };
-          }
           } else {
             aiAnalysis = {
               rootCause: auditDesc ?? "Lighthouse metric – see description for details.",
@@ -586,8 +591,12 @@ Return ONLY valid JSON with no markdown or extra text:
         }
         if (aiAnalysis) row.aiAnalysis = aiAnalysis;
       }
-      metrics_for_dashboard.push(row);
-    }
+      return row;
+    });
+
+    const metrics_for_dashboard: AIMetricRow[] = (await Promise.all(metricRowPromises)).filter(
+      (r): r is AIMetricRow => r !== null
+    );
 
     // 2️⃣ Extract metrics
     // INP is field-only (CrUX). CLS lab is reliable but we still keep a CrUX
@@ -793,11 +802,7 @@ Return ONLY valid JSON with no markdown or extra text:
       },
     };
     try {
-      const desktopRes = await fetch(
-        `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(
-          url
-        )}&strategy=desktop&key=${pageSpeedKey}`
-      );
+      const desktopRes = await desktopPsiPromise;
       if (desktopRes.ok) {
         const desktopData = await desktopRes.json();
         const desktopAudits = desktopData?.lighthouseResult?.audits;
